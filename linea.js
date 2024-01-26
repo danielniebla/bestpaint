@@ -168,8 +168,11 @@
 //////////////////////////////////////////
 var canvas = document.getElementById("miCanvas");
 var ctx = canvas.getContext("2d");
+ctx.willReadFrequently = true;  // Establece el atributo para mejorar el rendimiento
 
-var startX, startY; // Coordenadas del punto de inicio
+var isDrawing = false;
+var isNotDrawing = false; // Indica si el usuario está dibujando
+var startX, startY;    // Coordenadas del punto de inicio
 
 // Función para trazar una línea utilizando la fórmula y = mx + b
 function drawLine(x1, y1, x2, y2) {
@@ -179,32 +182,80 @@ function drawLine(x1, y1, x2, y2) {
     var startX = Math.min(x1, x2);
     var endX = Math.max(x1, x2);
 
-    var imageData = ctx.createImageData(canvas.width, canvas.height);
-    var data = imageData.data;
+    var data = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
 
-    for (var x = startX; x <= endX; x++) {
-        var y = m * x + b;
-        var index = (Math.round(y) * canvas.width + Math.round(x)) * 4;
+    var startY = Math.min(y1, y2);
+    var endY = Math.max(y1, y2);
+    console.log("delta x",(endX - startX)," delta y",(endY - startY) );
+    if (((endX - startX) < (endY - startY) && (endX - startX)!=0) || ((endX - startX)==0 && (endY - startY)!=1)) {
+        for (var y = startY; y <= endY; y++) {
+            var x = (y - b) / m;
+            var index = (Math.round(y) * canvas.height + Math.round(x)) * 4;
 
-        data[index] = 255;     // Valor de rojo
-        data[index + 1] = 0;   // Valor de verde
-        data[index + 2] = 0;   // Valor de azul
+            data[index] = 255;     // Valor de rojo
+            data[index + 1] = 0;   // Valor de verde
+            data[index + 2] = 0;   // Valor de azul
+            data[index + 3] = 255; // Valor de opacidad
+        }
+        console.log('a');
+    } else if(((endX - startX)<2 && (endY - startY)<2)){
+        var index = (Math.round(endY) * canvas.width + Math.round(endX)) * 4;
+
+        data[index] = 0;     // Valor de rojo
+        data[index + 1] = 255;   // Valor de verde
+        data[index + 2] = 255;   // Valor de azul
         data[index + 3] = 255; // Valor de opacidad
+
+    }else {
+        for (var x = startX; x <= endX; x++) {
+            var y = m * x + b;
+            var index = (Math.round(y) * canvas.width + Math.round(x)) * 4;
+
+            data[index] = 0;     // Valor de rojo
+            data[index + 1] = 0;   // Valor de verde
+            data[index + 2] = 0;   // Valor de azul
+            data[index + 3] = 255; // Valor de opacidad
+        }
     }
 
-    ctx.putImageData(imageData, 0, 0);
+    ctx.putImageData(new ImageData(new Uint8ClampedArray(data), canvas.width, canvas.height), 0, 0);
 }
 
 // Evento mousedown para capturar el punto de inicio
 canvas.addEventListener("mousedown", function (event) {
-    startX = event.clientX - canvas.getBoundingClientRect().left;
-    startY = event.clientY - canvas.getBoundingClientRect().top;
+    isDrawing = true;
+    if(!isNotDrawing){
+        startX = event.clientX - canvas.getBoundingClientRect().left;
+        startY = event.clientY - canvas.getBoundingClientRect().top;
+    }
 });
 
 // Evento mouseup para trazar la línea hacia el punto final
 canvas.addEventListener("mouseup", function (event) {
-    var endX = event.clientX - canvas.getBoundingClientRect().left;
-    var endY = event.clientY - canvas.getBoundingClientRect().top;
+    if (isDrawing) {
+        if(isNotDrawing){
+            var endX = event.clientX - canvas.getBoundingClientRect().left;
+            var endY = event.clientY - canvas.getBoundingClientRect().top;
 
-    drawLine(startX, startY, endX, endY);
+            drawLine(startX, startY, endX, endY);
+            isNotDrawing = false;
+        }else{
+            isNotDrawing = true;
+        }
+        isDrawing = false;
+    }
+
+});
+
+// Evento mousemove para dibujo libre mientras se mantiene presionado el botón
+canvas.addEventListener("mousemove", function (event) {
+    if (isDrawing) {
+        var mouseX = event.clientX - canvas.getBoundingClientRect().left;
+        var mouseY = event.clientY - canvas.getBoundingClientRect().top;
+
+        drawLine(startX, startY, mouseX, mouseY);
+        startX = mouseX;
+        startY = mouseY;
+        isNotDrawing = true;
+    }
 });
