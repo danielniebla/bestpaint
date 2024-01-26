@@ -1,0 +1,84 @@
+<!--<html>
+  <body onload="draw();">
+    <canvas id="canvas" width="150" height="150"></canvas>
+  </body>
+</html>
+
+-->
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pizarra</title>
+    <style>
+/*         
+        canvas {
+            width: 1400px;
+            height: 800px;
+            background-color: #fff;
+            border: 2px solid blue;
+            z-index: 0;
+        }
+
+        .icon {
+            width: 50px;
+            height: 50px;
+        }
+        .invisible{
+            visibility: hidden;
+        }
+        .modal{
+            visibility: visible;
+            position: fixed;
+            width: 70%;
+            margin: auto ;
+            padding: 10px;
+            margin-top: 40px;
+            z-index: 2;
+            top: 0;
+            background-color: rgb(185, 185, 241);
+        }
+        .space{
+            width: 100%;
+            display: flex;
+            justify-content: center;
+        }
+        .mini-icon{
+            width: 20px;
+            height: 20px; 
+            margin-bottom: auto ;
+            display: inline;
+        }
+        p{
+            margin: auto;
+            display: inline;
+            font-size: 18px;
+        } */
+        canvas {
+            border: 1px solid #000;
+        }
+    </style>
+</head>
+<body > <!--  onload="pizarra()" -->
+    <!-- <div class="space">
+        <button>
+            <p>opciones</p>
+            <img src="./ajuste.png" alt="" class="mini-icon">
+        </button onclick="modal()">
+    </div>
+    <div class="space">
+        <canvas id="pizarra"></canvas>
+    </div>
+    <div class="space">
+        <div class="modal" id="mod">
+            <img src="./lapiz.png" alt="" class="icon lapiz" onclick="cambiarGrosor()">
+            <img src="./segmento-de-linea.png" alt="" class="icon linea" onclick="iniciarDibujo()">
+        </div>
+    </div> -->
+    <canvas id="miCanvas" width="400" height="400"></canvas>
+    
+    
+    <script src="./linea.js"></script>
+</body>
+</html>
