@@ -55,6 +55,10 @@
         canvas {
             border: 1px solid #000;
         }
+        #strokeWidth{
+            width: 30px;
+            height: 10px;
+        }
     </style>
 </head>
 <body > <!--  onload="pizarra()" -->
@@ -69,9 +73,17 @@
     </div>
     <div class="space">
         <div class="modal" id="mod">
+            <input type="number" id="strokeWidth" value="3" onchange="updateStroke(this.value)">
+            <input type="color" id="colorPicker" value="#000000" onchange="updateHexColor()">
             <img src="./img/lapiz.png" alt="" class="icon lapiz" onclick="llamada(1)">
             <img src="./img/segmento-de-linea.png" alt="" class="icon linea" onclick="llamada(2)">
-            <img src="./img/tecnico.png" alt="" class="icon" onclick="llamada(3)">
+            <img src="./img/circulo-dibujado-a-mano-luna.png" alt="" class="icon" onclick="llamada(3)">
+            <img src="./img/forma.png" alt="" class="icon"  onclick="llamada(4)">
+            <img src="./img/contorno-de-forma-cuadrada-dibujada-a-mano.png" alt="" class="icon" onclick="llamada(5)">
+            <div>
+                <img src="./img/poligono.png" alt="" class="icon" onclick="llamada(6)">
+                <input type="number" id="strokeWidth" value="5" onchange="updateside(this.value)">
+            </div>
         </div>
     </div>
     
