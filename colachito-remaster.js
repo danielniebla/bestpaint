@@ -89,9 +89,9 @@ function llamada(option){
             canvas.addEventListener("mousemove", drawMove);
             canvas.addEventListener("mouseup", drawUp);
 
-            // canvas.addEventListener("touchstart", drawDown);
-            // canvas.addEventListener("touchmove", drawMove);
-            // canvas.addEventListener("touchend", drawUp);
+            // canvas.addEventListener("touchstart", tDrawDown);
+            // canvas.addEventListener("touchmove", tDrawMove);
+            // canvas.addEventListener("touchend", tDrawUp);
             break;
         case 2:
             canvas.addEventListener("mousedown", lineDown);
@@ -162,6 +162,44 @@ function drawUp(event){
         agregarDatos(last,startX, startY, endX, endY);
     }
 }
+function tDrawDown(event) {
+    event.preventDefault();
+    event.stopPropagation();
+
+    last += 1;
+    isDrawing = true;
+    
+    // Accede a las coordenadas táctiles del primer punto de contacto
+    startX = event.touches[0].clientX - canvas.getBoundingClientRect().left;
+    startY = event.touches[0].clientY - canvas.getBoundingClientRect().top;
+}
+function tDrawMove(event) {
+    event.preventDefault();
+    event.stopPropagation();
+
+    if (isDrawing && event.touches && event.touches[0]) {
+        var mouseX = event.touches[0].clientX - canvas.getBoundingClientRect().left;
+        var mouseY = event.touches[0].clientY - canvas.getBoundingClientRect().top;
+        drawLineBresenham(startX, startY, mouseX, mouseY, stroke, color);
+        agregarDatos(last, startX, startY, mouseX, mouseY);
+        startX = mouseX;
+        startY = mouseY;
+    }
+}
+function tDrawUp(event) {
+    event.preventDefault();
+    event.stopPropagation();
+
+    if (isDrawing && event.touches && event.touches[0]) {
+        // Verifica que event.touches y event.touches[0] existan antes de acceder a sus propiedades
+        var endX = event.touches[0].clientX - canvas.getBoundingClientRect().left;
+        var endY = event.touches[0].clientY - canvas.getBoundingClientRect().top;
+        
+        isDrawing = false;
+        drawLineBresenham(startX, startY, endX, endY, stroke, color);
+        agregarDatos(last, startX, startY, endX, endY);
+    }
+}
 //---linea bresenham---//
 function lineDown(event){
     last+=1;
@@ -175,9 +213,9 @@ function lineMove(event){
         var endX = event.clientX - canvas.getBoundingClientRect().left;
         var endY = event.clientY - canvas.getBoundingClientRect().top;
         drawLineBresenham(startX, startY, endX, endY, stroke,color);
-        setTimeout(() => {
+        // setTimeout(() => {
             drawFigures();
-        }, 100);
+        // }, 100);
     }
 }
 function lineUp(event){
@@ -203,9 +241,9 @@ function circleMove(){
         var endX = event.clientX - canvas.getBoundingClientRect().left;
         var endY = event.clientY - canvas.getBoundingClientRect().top;
         drawCircle(startX, startY, calculateRadius(endX, startX, endY, startY),stroke,color);
-        setTimeout(() => {
+        // setTimeout(() => {
             drawFigures();
-        }, 100);
+        // }, 100);
     } 
 }
 function circleUp(event){
@@ -238,9 +276,9 @@ function rectangleMove(event){
         drawLineBresenham(startX, startY, startX, endY,stroke,color);
         //--linea final y--//
         drawLineBresenham(endX, startY, endX, endY,stroke,color);
-        setTimeout(() => {
+        // setTimeout(() => {
             drawFigures();
-        }, 100);
+        // }, 100);
     }
 }
 function rectangleUp(event){
@@ -273,9 +311,9 @@ function squareMove(event){
         drawLineBresenham(startX, startY, startX, (startY+deltax),stroke,color);
         //--linea final y--//
         drawLineBresenham(endX, startY, endX, (startY+deltax),stroke,color);
-        setTimeout(() => {
+        // setTimeout(() => {
             drawFigures();
-        }, 100);
+        // }, 100);
     }
 }
 function squareUp(event){
@@ -300,9 +338,9 @@ function poligonoMove(event){
         var endX = event.clientX - canvas.getBoundingClientRect().left;
         var endY = event.clientY - canvas.getBoundingClientRect().top;
         drawpoligono(startX, startY, endX, endY, stroke,color,numSides);
-        setTimeout(() => {
+        // setTimeout(() => {
             drawFigures();
-        }, 100);
+        // }, 100);
 
     }
 }
@@ -328,9 +366,9 @@ function elipseMove(evente){
         var endX = event.clientX - canvas.getBoundingClientRect().left;
         var endY = event.clientY - canvas.getBoundingClientRect().top;
         drawEllipse(startX, startY, Math.abs(endX - startX), Math.abs(endY - startY), stroke,color);
-        setTimeout(() => {
+        // setTimeout(() => {
             drawFigures();
-        }, 100);
+        // }, 100);
     }
 }
 function elipseUp(event){
@@ -400,23 +438,24 @@ function drawLineBresenham(x1, y1, x2, y2,str, col) {
     }
 }
 function drawpoligono(x1, y1, x2, y2,str, col, sid){
-    const deltax = Math.abs(x2 - x1);
-        const deltay = Math.abs(y2 - y1);
-        const radius = Math.sqrt((deltax * deltax) + (deltay * deltay));
-        var x = x2;
-        var y = y2;    
-        for (let i = 0; i < numSides+1; i++) {
-            if( i < sid){
-                var theta = (2 * Math.PI * i) / sid;
-                var x3 = x + radius * Math.cos(theta);
-                var y3 = y + radius * Math.sin(theta);   
-                drawLineBresenham(Math.round(x), Math.round(y), Math.round(x3), Math.round(y3), str ,col);
-                x=x3;
-                y=y3;
-            }else if(i === sid ){
-                drawLineBresenham(Math.round(x), Math.round(y), Math.round(x2), Math.round(y2), str ,col);
-            }
+    radius = Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
+    initialAngle = Math.atan2(y2 - y1, x2 - x1);
+    var angle = (2 * Math.PI) / sid; // Ángulo central de cada vértice
+    var lastX, lastY;
+
+    for (var i = 0; i < sid; i++) {
+        var x = Math.round(x1 + radius * Math.cos(angle * i + initialAngle));
+        var y = Math.round(y1 + radius * Math.sin(angle * i + initialAngle));
+
+        if (i > 0) {
+            drawLineBresenham(lastX, lastY, x, y,str,col);
         }
+
+        lastX = x;
+        lastY = y;
+    }
+    // Dibujar la última línea que conecta el último punto con el primero
+    drawLineBresenham(lastX, lastY, Math.round(x1 + radius * Math.cos(initialAngle)), Math.round(y1 + radius * Math.sin(initialAngle)),str,col);
 }
 // Función para dibujar una elipse a partir de su centro y semiejes (a y b)
 function drawEllipse(x1, y1, x2, y2,str,col) {
