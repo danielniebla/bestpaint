@@ -1,0 +1,116 @@
+body {
+  margin: 0;
+  height: 100vh;
+  background: radial-gradient(
+    ellipse at center,
+    #e2e6ff 0%,
+    #c5cfff 20%,
+    #929cd2 30%,
+    #2d3a7d 65%,
+    #2e3661 85%,
+    #181c33 100%
+  );
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+}
+.josefin-slab {
+  font-family: "Josefin Slab", serif;
+  font-optical-sizing: auto;
+  font-weight: 700;
+  font-style: italic;
+}
+.imgContainer {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background-image: url(./img/back.png);
+  background-size: contain;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+canvas {
+  background-color: #fff;
+  border: 2px solid blue;
+  z-index: 0;
+  border-radius: 50px;
+  margin-top: 0;
+  margin-bottom: auto;
+}
+
+.icon {
+  width: 50px;
+  height: 50px;
+}
+.invisible {
+  visibility: hidden;
+}
+.modal {
+  padding: 35px 25px;
+  margin-top: 60px;
+  visibility: visible;
+  width: 70%;
+  height: 60vh;
+  background: linear-gradient(to bottom, #e2e6ff 0%, #c5cfff 20%, #929cd2 100%);
+  opacity: 90%;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  border-radius: 15% 85% 15% 85% / 85% 15% 85% 15%;
+}
+.space {
+  margin-top: 0;
+  display: grid;
+  place-items: center;
+  height: 100vh; /* Ajusta la altura según tus necesidades */
+}
+.but {
+  border-radius: 31% 69% 32% 68% / 80% 21% 79% 20%;
+  width: 80%;
+  height: 40px;
+  background: linear-gradient(to right, #e2e6ff 0%, #c5cfff 20%, #929cd2 100%);
+  opacity: 95%;
+  border: none;
+}
+.controls {
+  width: 100%;
+  margin-left: 20px;
+}
+.control {
+  width: 100%;
+  padding-left: 20px;
+}
+.mini-icon {
+  width: 20px;
+  height: 20px;
+  margin-bottom: auto;
+  display: inline;
+}
+p {
+  margin: auto;
+  display: inline;
+  font-size: 18px;
+}
+#strokeWidth,
+.strokeWidth {
+  width: 30px;
+  height: 10px;
+}
+
+h1 {
+  color: #181c33;
+  text-align: center;
+  padding: 0;
+}
+.flex {
+  display: flex;
+  width: 100%;
+  justify-content: center;
+  margin: 0%;
+  padding: 0;
+}
+.grid {
+  display: grid;
+  grid-template-columns: 1fr 3fr 1fr;
+}

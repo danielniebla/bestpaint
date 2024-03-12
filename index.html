@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script type="module" src="./index.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Josefin+Slab:ital@1&display=swap" rel="stylesheet">
+    <title>Ravenclaw Paint</title>
+    <link rel="stylesheet" href="index.css">
+</head>
+
+<body > 
+    <div class="imgContainer">
+        <div class="flex">
+            <h1 class="josefin-slab">It`s ok even if is not ok</h1>
+        </div>
+        <div class="grid">
+            <div class="control"> 
+                <button class="but mirror" onclick="modal()">
+                    <p>opciones</p>
+                    <img src="./img/ajuste.png" alt="" class="mini-icon">
+                </button>
+                <div class="modal mirror" class="mod">
+                    <input type="number" id="strokeWidth" value="3" onchange="event.preventDefault();">
+                    <input type="color" id="colorPicker" value="#000000" onchange="event.preventDefault();">
+                    <img src="./img/lapiz.png" alt="" id="1" class="icon lapiz" onclick="event.preventDefault();">
+                    <img src="./img/segmento-de-linea.png" alt="" id="2" class="icon linea" onclick="event.preventDefault();">
+                    <img src="./img/circulo-dibujado-a-mano-luna.png" alt="" id="3" class="icon" onclick="event.preventDefault();">
+                    <img src="./img/forma.png" alt="" id="4" class="icon" onclick="event.preventDefault();">
+                    <img src="./img/contorno-de-forma-cuadrada-dibujada-a-mano.png" alt="" id="5" class="icon" onclick="event.preventDefault();">
+                    <div>
+                        <img src="./img/poligono.png" alt="" id="6" class="icon" onclick="event.preventDefault();">
+                        <input type="number" class="strokeWidth" id="sides" value="5" onchange="event.preventDefault();">
+                    </div>
+                    <img src="./img/elipse.png" alt="" id="7" class="icon" onclick="event.preventDefault();">
+                    <img src="./img/atras.png" alt="" class="icon" id="undo" onclick="event.preventDefault()">
+                </div>
+            </div>
+            <div class="space">
+                <canvas id="miCanvas" width="900" height="650"></canvas>
+            </div>
+            <div class="controls">
+                <button class="but" onclick="modal()">
+                    <p>opciones</p>
+                    <img src="./img/ajuste.png" alt="" class="mini-icon">
+                </button>
+                <div class="modal" class="mod">
+                    <img src="./img/flecha-correcta.png" alt="" id="endo" class="icon" onclick="event.preventDefault();">
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script></script>
+
+</body>
+
+</html>

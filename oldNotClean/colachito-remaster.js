@@ -499,10 +499,10 @@ function drawEllipse(x1, y1, x2, y2,str,col) {
 function drawEllipsePoints(xc, yc, x, y,str,col) {
     ctx.fillStyle = col;
     // Dibujar los puntos simétricos en el octante
-    ctx.fillRect(xc + x, yc + y, str, str);
-    ctx.fillRect(xc - x, yc + y, str, str);
-    ctx.fillRect(xc + x, yc - y, str, str);
-    ctx.fillRect(xc - x, yc - y, str, str);
+    drawPixel(xc + x, yc + y, str, col);
+    drawPixel(xc - x, yc + y, str, col);
+    drawPixel(xc + x, yc - y, str, col);
+    drawPixel(xc - x, yc - y, str, col);
 }
 //--------------------------dibujar en el canva-----------------//
 function drawFigures() {
