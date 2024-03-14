@@ -3,13 +3,18 @@ body {
   height: 100vh;
   background: radial-gradient(
     ellipse at center,
-    #e2e6ff 0%,
-    #c5cfff 20%,
-    #929cd2 30%,
-    #2d3a7d 65%,
-    #2e3661 85%,
-    #181c33 100%
+    #2E3CD1 0%,
+    #8B2ED1 50%,
+    #180D3B 100%
   );
+  /* #e2e6ff 0%,
+  #c5cfff 20%,
+  #929cd2 30%,
+  #2d3a7d 65%,
+  #2e3661 85%,
+  #181c33 100% */
+
+
   display: flex;
   justify-content: center;
   align-items: center;
@@ -25,19 +30,18 @@ body {
   position: absolute;
   width: 100%;
   height: 100%;
-  background-image: url(./img/back.png);
+  background-image: url(./img/back.svg);
   background-size: contain;
   background-position: center;
   background-repeat: no-repeat;
 }
 
+
 canvas {
   background-color: #fff;
   border: 2px solid blue;
-  z-index: 0;
   border-radius: 50px;
-  margin-top: 0;
-  margin-bottom: auto;
+  margin-top: 0 auto;
 }
 
 .icon {
@@ -58,15 +62,46 @@ canvas {
   display: grid;
   grid-template-columns: 1fr 1fr;
   border-radius: 15% 85% 15% 85% / 85% 15% 85% 15%;
+  box-shadow:  -15px 15px 40px rgba(46, 60, 209, .5),
+             15px -15px 40px rgba(139, 46, 209, .5);
 }
+.modal.mirror{
+  border-radius: 85% 15% 85% 15% / 15% 85% 15% 85%;
+}
+#elementoOculto {
+  display: none;
+  animation: gelatina 0.6s ease-in-out both; /* Aplica la animación 'gelatina' */
+}
+#elementoOculto2 {
+  display: none;
+  animation: gelatina 0.6s ease-in-out both; /* Aplica la animación 'gelatina' */
+}
+
+@keyframes gelatina {
+  from, to {
+      transform: scale3d(1, 1, 1);
+  }
+
+  25%, 75% {
+      transform: scale3d(1.15, 0.95, 1);
+  }
+
+  50% {
+      transform: scale3d(0.95, 1.15, 1);
+  }
+}
+
 .space {
-  margin-top: 0;
-  display: grid;
+  margin: 0;
+  padding: 0;
   place-items: center;
   height: 100vh; /* Ajusta la altura según tus necesidades */
 }
-.but {
+.but.mirror{
   border-radius: 31% 69% 32% 68% / 80% 21% 79% 20%;
+}
+.but {
+  border-radius: 80% 21% 79% 20% / 31% 69% 32% 68%;
   width: 80%;
   height: 40px;
   background: linear-gradient(to right, #e2e6ff 0%, #c5cfff 20%, #929cd2 100%);
@@ -109,6 +144,25 @@ h1 {
   justify-content: center;
   margin: 0%;
   padding: 0;
+}
+.flexy{
+  border-radius: 88% 12% 89% 11% / 5% 92% 8% 95%;
+  background-color: rgba(139, 46, 209, .5) ;
+  width: 600px;
+  height: 60px;
+  display: flex;
+  justify-content: space-around;
+  margin: 0 auto;
+    
+}
+.col{
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  margin-top: 0 ;
+}
+.flexy *:not(.flexy){
+  filter: invert(100%);
 }
 .grid {
   display: grid;

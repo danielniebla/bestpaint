@@ -19,35 +19,45 @@
         </div>
         <div class="grid">
             <div class="control"> 
-                <button class="but mirror" onclick="modal()">
+                <button class="but " id="toggleButton" onclick="event.preventDefault();">
                     <p>opciones</p>
                     <img src="./img/ajuste.png" alt="" class="mini-icon">
                 </button>
-                <div class="modal mirror" class="mod">
-                    <input type="number" id="strokeWidth" value="3" onchange="event.preventDefault();">
+                <div class="modal " class="mod" id="elementoOculto">
+                    <h3 class="col"> 
+                        Stroke
+                        <input type="number" id="strokeWidth" value="3" onchange="event.preventDefault();">
+                    </h3>
                     <input type="color" id="colorPicker" value="#000000" onchange="event.preventDefault();">
                     <img src="./img/lapiz.png" alt="" id="1" class="icon lapiz" onclick="event.preventDefault();">
                     <img src="./img/segmento-de-linea.png" alt="" id="2" class="icon linea" onclick="event.preventDefault();">
                     <img src="./img/circulo-dibujado-a-mano-luna.png" alt="" id="3" class="icon" onclick="event.preventDefault();">
                     <img src="./img/forma.png" alt="" id="4" class="icon" onclick="event.preventDefault();">
                     <img src="./img/contorno-de-forma-cuadrada-dibujada-a-mano.png" alt="" id="5" class="icon" onclick="event.preventDefault();">
-                    <div>
+                    <div class="col">
                         <img src="./img/poligono.png" alt="" id="6" class="icon" onclick="event.preventDefault();">
                         <input type="number" class="strokeWidth" id="sides" value="5" onchange="event.preventDefault();">
                     </div>
                     <img src="./img/elipse.png" alt="" id="7" class="icon" onclick="event.preventDefault();">
-                    <img src="./img/atras.png" alt="" class="icon" id="undo" onclick="event.preventDefault()">
+                    <img src="./img/rombo.png" id="8" alt="" class="icon" onclick="event.preventDefault();">
+                    <img src="./img/trapecio.png" id="9" class="icon" onclick="event.preventDefault();" alt="">
+                    <img src="./img/borrador.png" alt="" class="icon" id="10" onclick="event.preventDefault();">
                 </div>
             </div>
             <div class="space">
                 <canvas id="miCanvas" width="900" height="650"></canvas>
+                <div class="flexy">
+                    <img src="./img/limpieza.png" alt="" id="clean" class="icon" onclick="event.preventDefault();">
+                    <img src="./img/mover.png" alt="" class="icon" id="11" onclick="event.preventDefault();">
+                </div>
             </div>
             <div class="controls">
-                <button class="but" onclick="modal()">
+                <button class="but mirror" id="toggleButton2" onclick="event.preventDefault();">
                     <p>opciones</p>
                     <img src="./img/ajuste.png" alt="" class="mini-icon">
                 </button>
-                <div class="modal" class="mod">
+                <div class="modal mirror" class="mod" id="elementoOculto2">
+                    <img src="./img/atras.png" alt="" class="icon" id="undo" onclick="event.preventDefault()">
                     <img src="./img/flecha-correcta.png" alt="" id="endo" class="icon" onclick="event.preventDefault();">
                 </div>
             </div>
