@@ -27,10 +27,9 @@ function selectLine(x1,y1,x2,y2,x,y,s){
     const sx = (x1 < x2) ? 1 : -1;
     const sy = (y1 < y2) ? 1 : -1;
     let err = deltax - deltay;
-    let rad = Math.round(s / 2);
     if(err != 0){
         while (x1 !== x2 || y1 !== y2) {
-            if (x1 >= x - rad && x1 <= x + rad && y1 >= y - rad && y1 <= y + rad) {
+            if (x1 >= x - s && x1 <= x + s && y1 >= y - s && y1 <= y + s) {
                 return true;
             }
             let e2 = 2 * err;

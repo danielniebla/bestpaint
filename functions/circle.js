@@ -34,18 +34,17 @@ function selectCircle(centerX, centerY, endX,endY,x3,y3,str) {
     let x = calculateRadius(endX,centerX,endY,centerY);
     let y = 0;
     let decisionOver2 = 1 - x;   // Inicialización de la decisión del punto (el primer punto siempre está en el octante superior derecho)
-    let rad = str / 2;
     while (y <= x) {
         // Dibuja el pixel en cada octante    
-        if ((centerX + x) >= x3 - rad && (centerX + x) <= x3 + rad && (centerY - y) >= y3 - rad && (centerY - y) <= y3 + rad) {return true;}
-        if ((centerX - x) >= x3 - rad && (centerX - x) <= x3 + rad && (centerY - y) >= y3 - rad && (centerY - y) <= y3 + rad) {return true;}
-        if ((centerX + x) >= x3 - rad && (centerX + x) <= x3 + rad && (centerY + y) >= y3 - rad && (centerY + y) <= y3 + rad) {return true;}
-        if ((centerX - x) >= x3 - rad && (centerX - x) <= x3 + rad && (centerY + y) >= y3 - rad && (centerY + y) <= y3 + rad) {return true;}
-        if ((centerX + x) >= x3 - rad && (centerX + x) <= x3 + rad && (centerY - y) >= y3 - rad && (centerY - y) <= y3 + rad) {return true;}
-        if ((centerX + y) >= x3 - rad && (centerX + y) <= x3 + rad && (centerY - x) >= y3 - rad && (centerY - x) <= y3 + rad) {return true;}
-        if ((centerX - y) >= x3 - rad && (centerX - y) <= x3 + rad && (centerY - x) >= y3 - rad && (centerY - x) <= y3 + rad) {return true;}
-        if ((centerX + y) >= x3 - rad && (centerX + y) <= x3 + rad && (centerY + x) >= y3 - rad && (centerY + x) <= y3 + rad) {return true;}
-        if ((centerX - y) >= x3 - rad && (centerX - y) <= x3 + rad && (centerY + x) >= y3 - rad && (centerY + x) <= y3 + rad) {return true;}
+        if ((centerX + x) >= x3 - str && (centerX + x) <= x3 + str && (centerY - y) >= y3 - str && (centerY - y) <= y3 + str) {return true;}
+        if ((centerX - x) >= x3 - str && (centerX - x) <= x3 + str && (centerY - y) >= y3 - str && (centerY - y) <= y3 + str) {return true;}
+        if ((centerX + x) >= x3 - str && (centerX + x) <= x3 + str && (centerY + y) >= y3 - str && (centerY + y) <= y3 + str) {return true;}
+        if ((centerX - x) >= x3 - str && (centerX - x) <= x3 + str && (centerY + y) >= y3 - str && (centerY + y) <= y3 + str) {return true;}
+        if ((centerX + x) >= x3 - str && (centerX + x) <= x3 + str && (centerY - y) >= y3 - str && (centerY - y) <= y3 + str) {return true;}
+        if ((centerX + y) >= x3 - str && (centerX + y) <= x3 + str && (centerY - x) >= y3 - str && (centerY - x) <= y3 + str) {return true;}
+        if ((centerX - y) >= x3 - str && (centerX - y) <= x3 + str && (centerY - x) >= y3 - str && (centerY - x) <= y3 + str) {return true;}
+        if ((centerX + y) >= x3 - str && (centerX + y) <= x3 + str && (centerY + x) >= y3 - str && (centerY + x) <= y3 + str) {return true;}
+        if ((centerX - y) >= x3 - str && (centerX - y) <= x3 + str && (centerY + x) >= y3 - str && (centerY + x) <= y3 + str) {return true;}
         y++;
         // Actualiza la decisión según el algoritmo del punto medio
         if (decisionOver2 <= 0) {

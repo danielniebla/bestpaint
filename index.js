@@ -23,6 +23,7 @@ var last = 0;
 var numSides = 5;
 var startX, startY;   
 var type = 1;
+var sKey =0;
 var und =0;
 function updateHexColor() {
     color = colorPicker.value;
@@ -33,14 +34,14 @@ function updateStroke(strokeValue) {
 function updateside(sidevalue){
     numSides = sidevalue;
 }
-function agregarDatos(llave,x1, y1, x2, y2) {
-    if (!datos[llave]) {
-        datos[llave] = []; // Si no existe, inicializar una matriz para esa llave
+function agregarDatos(key,x1, y1, x2, y2) {
+    if (!datos[key]) {
+        datos[key] = []; // Si no existe, inicializar una matriz para esa key
         if(type==6){
-            sides[llave]=numSides;
+            sides[key]=numSides;
         }
     }
-    datos[llave].push({
+    datos[key].push({
         x1: x1,
         y1: y1,
         x2: x2,
@@ -51,8 +52,25 @@ function agregarDatos(llave,x1, y1, x2, y2) {
         type: type,
     });
 }
-function eliminarDatos(llave) {
-    for(var i = llave; i > (llave +und) ; i--){
+function actualizarDatos(key, index, x1, y1, x2, y2, stroke, layer, color) {
+    if (datos[key] && datos[key][index]) {
+        datos[key][index] = {
+            x1: x1,
+            y1: y1,
+            x2: x2,
+            y2: y2,
+            stroke: stroke,
+            layer: layer,
+            color: color,
+            type: datos[key][index].type // Mantener el valor existente de type
+        };
+    } else {
+        console.error("No se encontraron datos para la clave proporcionada o el índice proporcionado está fuera de rango.");
+    }
+}
+
+function eliminarDatos(key) {
+    for(var i = key; i > (key +und) ; i--){
         if (datos[i] && datos[i].length > 0) {
             while(datos[i].length != 0){
                 datos[i].pop();
@@ -82,6 +100,7 @@ document.getElementById("8").addEventListener("click", function () {type = 8, no
 document.getElementById("9").addEventListener("click", function () {type = 9, noB();});
 document.getElementById("10").addEventListener("click", function () {type = 1, borrador();});
 document.getElementById("11").addEventListener("click", function () {type = 11;});
+document.getElementById("12").addEventListener("click", function () {type = 12;});
 
 
 document.getElementById("colorPicker").addEventListener("input", updateHexColor);
@@ -149,69 +168,151 @@ function getCoordinates(event) {
 //-------------------------------dibujado--------------------------//
 function startDrawing(event) {
     const { x, y } = getCoordinates(event);
-    if(type==11){
-
-        selectFigure(x,y);
-    }else{
-        if(und==0){
-            last +=1;
-        }
-        isDrawing =true;
-        startX = x;
-        startY = y;
+    if(type==11 || type == 12){
+        sKey=selectFigure(x,y);
+    }else if(und==0){
+        last +=1;
     }
+    isDrawing =true;
+    startX = x;
+    startY = y;
 }
 function draw(event) {
-    
     if(isDrawing){   
+        const { x, y } = getCoordinates(event);
+        const endX = x;
+        const endY = y;
         if(type!=1){
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             // setTimeout(() => {
                 drawFigures();
                 // }, 100);
         }  
-        const { x, y } = getCoordinates(event);
-        const endX = x;
-        const endY = y;
-        switch (type) {
+            switch (type) {
+                case 1:
+                    const mouseX = x
+                    const mouseY = y
+                    drawLineBresenham(startX, startY, mouseX, mouseY, stroke,color);
+                    agregarDatos(last,startX, startY, mouseX, mouseY);
+                    startX = mouseX;
+                    startY = mouseY;
+                    break;
+                case 2:
+                    drawLineBresenham(startX, startY, endX, endY, stroke,color);
+                    break;
+                case 3:
+                    drawCircle(startX, startY,endX,endY,stroke,color);
+                    break;
+                case 4:
+                    rectangle(startX,startY,endX,endY,stroke,color);
+                    break;
+                case 5:
+                    square(startX,startY,endX,stroke,color);
+                    break;
+                case 6:
+                    drawpolygon(startX, startY, endX, endY, stroke,color,numSides);
+                    break;
+                case 7:
+                    drawEllipse(startX, startY, Math.abs(endX - startX), Math.abs(endY - startY), stroke,color);
+                    break;
+                case 8:
+                    drawRombo(startX, startY, Math.abs(endX - startX), Math.abs(endY - startY), stroke,color);
+                    break;
+                case 9:
+                    drawTrapezoid(startX,startY,endX,endY,stroke,color);
+                    break;
+                case 11:
+                    if(sKey!=0){//----------------move---------------//
+                        const currentx= endX - startX; 
+                        const currenty= endY - startY;
+                        switch (datos[sKey][0].type) {
+                            case 1:
+                                for (let i = 0; i < datos[sKey].length; i++) {
+                                    drawLineBresenham(datos[sKey][i].x1 + currentx, datos[sKey][i].y1 + currenty, datos[sKey][i].x2 + currentx, datos[sKey][i].y2 + currenty, datos[sKey][i].stroke,datos[sKey][i].color);
+                                }
+                                break;
+                            case 2:                            
+                                drawLineBresenham(datos[sKey][0].x1 + currentx, datos[sKey][0].y1 + currenty, datos[sKey][0].x2 + currentx, datos[sKey][0].y2 + currenty, datos[sKey][0].stroke,datos[sKey][0].color);
+                                break;
+                            case 3:
+                                drawCircle(datos[sKey][0].x1 + currentx, datos[sKey][0].y1 + currenty, datos[sKey][0].x2 + currentx, datos[sKey][0].y2 + currenty, datos[sKey][0].stroke,datos[sKey][0].color);
+                                break;
+                            case 4:
+                                rectangle(datos[sKey][0].x1 + currentx, datos[sKey][0].y1 + currenty, datos[sKey][0].x2 + currentx, datos[sKey][0].y2 + currenty, datos[sKey][0].stroke,datos[sKey][0].color);
+                                break;
+                            case 5:
+                                square(datos[sKey][0].x1 + currentx, datos[sKey][0].y1 + currenty, datos[sKey][0].x2 + currentx,  datos[sKey][0].stroke,datos[sKey][0].color);
+                                break;
+                            case 6:
+                                drawpolygon(datos[sKey][0].x1 + currentx, datos[sKey][0].y1 + currenty, datos[sKey][0].x2 + currentx, datos[sKey][0].y2 + currenty, datos[sKey][0].stroke,datos[sKey][0].color,sides[sKey]);
+                                break;
+                            case 7:
+                                drawEllipse(datos[sKey][0].x1 + currentx, datos[sKey][0].y1 + currenty, datos[sKey][0].x2, datos[sKey][0].y2, datos[sKey][0].stroke,datos[sKey][0].color);
+                                break;
+                            case 8:
+                                drawRombo(datos[sKey][0].x1 + currentx, datos[sKey][0].y1 + currenty, datos[sKey][0].x2, datos[sKey][0].y2, datos[sKey][0].stroke,datos[sKey][0].color);
+                                break;
+                            case 9:
+                                drawTrapezoid(datos[sKey][0].x1 + currentx, datos[sKey][0].y1 + currenty, datos[sKey][0].x2 + currentx, datos[sKey][0].y2 + currenty, datos[sKey][0].stroke,datos[sKey][0].color);
+                                break;
+                            default:
+                            console.log("Opción no reconocida");
+                            break;
+                        }
+                    }
+                    break;
+                case 12:
+                    if(sKey!=0){//----------------move---------------//
+                        const slope = (datos[sKey][0].y2 - datos[sKey][0].y1) / (datos[sKey][0].x2 - datos[sKey][0].x1);
+                        const angle = Math.atan(slope);
+                        const currentx = endX - startX; 
+                        const currenty = endY - startY;
+                        const current = Math.round((currentx +currenty) /2);
+                        const deltaX = Math.round(current * Math.cos(angle));
+                        const deltaY = Math.round(current * Math.sin(angle));
+                        const current2 = Math.round((deltaX +deltaY) /2);
+                        switch (datos[sKey][0].type) {
+                            case 1:
+                                for (let i = 0; i < datos[sKey].length; i++) {
+                                    drawLineBresenham(datos[sKey][i].x1 , datos[sKey][i].y1 , datos[sKey][i].x2 + current, datos[sKey][i].y2 + current, datos[sKey][i].stroke,datos[sKey][i].color);
+                                }
+                                break;
+                            case 2:                            
+                                drawLineBresenham(datos[sKey][0].x1 , datos[sKey][0].y1 , datos[sKey][0].x2 + deltaX ,datos[sKey][0].y2 + deltaY, datos[sKey][0].stroke,datos[sKey][0].color);
+                                break;
+                            case 3:
+                                drawCircle(datos[sKey][0].x1 , datos[sKey][0].y1 , datos[sKey][0].x2 + deltaX, datos[sKey][0].y2 + deltaY, datos[sKey][0].stroke,datos[sKey][0].color);
+                                break;
+                            case 4:
+                                rectangle(datos[sKey][0].x1 , datos[sKey][0].y1 , datos[sKey][0].x2 + deltaX, datos[sKey][0].y2 + deltaY, datos[sKey][0].stroke,datos[sKey][0].color);
+                                break;
+                            case 5:
+                                square(datos[sKey][0].x1 , datos[sKey][0].y1 , datos[sKey][0].x2 + currentx,  datos[sKey][0].stroke,datos[sKey][0].color);
+                                break;
+                            case 6:
+                                drawpolygon(datos[sKey][0].x1 , datos[sKey][0].y1 , datos[sKey][0].x2 + deltaX, datos[sKey][0].y2 + deltaY, datos[sKey][0].stroke,datos[sKey][0].color,sides[sKey]);
+                                break;
+                            case 7:
+                                drawEllipse(datos[sKey][0].x1 , datos[sKey][0].y1 , datos[sKey][0].x2 + current2, datos[sKey][0].y2 + current2 , datos[sKey][0].stroke,datos[sKey][0].color);
+                                break;
+                            case 8:
+                                drawRombo(datos[sKey][0].x1 , datos[sKey][0].y1 , datos[sKey][0].x2 + current2, datos[sKey][0].y2 + current2 , datos[sKey][0].stroke,datos[sKey][0].color);
+                                break;
+                            case 9:
+                                drawTrapezoid(datos[sKey][0].x1 , datos[sKey][0].y1 , datos[sKey][0].x2 + deltaX, datos[sKey][0].y2 + deltaY, datos[sKey][0].stroke,datos[sKey][0].color);
+                                break;
+                            default:
+                            console.log("Opción no reconocida");
+                            break;
+                        }
+                    }
+                break;
 
-            case 1:
-                const mouseX = x
-                const mouseY = y
-                drawLineBresenham(startX, startY, mouseX, mouseY, stroke,color);
-                agregarDatos(last,startX, startY, mouseX, mouseY);
-                startX = mouseX;
-                startY = mouseY;
+                default:
+                console.log("Opción no reconocida");
                 break;
-            case 2:
-                drawLineBresenham(startX, startY, endX, endY, stroke,color);
-                break;
-            case 3:
-                drawCircle(startX, startY,endX,endY,stroke,color);
-                break;
-            case 4:
-                rectangle(startX,startY,endX,endY,stroke,color);
-                break;
-            case 5:
-                square(startX,startY,endX,stroke,color);
-                break;
-            case 6:
-                drawpolygon(startX, startY, endX, endY, stroke,color,numSides);
-                break;
-            case 7:
-                drawEllipse(startX, startY, Math.abs(endX - startX), Math.abs(endY - startY), stroke,color);
-                break;
-            case 8:
-                drawRombo(startX, startY, Math.abs(endX - startX), Math.abs(endY - startY), stroke,color);
-                break;
-            case 9:
-                drawTrapezoid(startX, startY, Math.abs(endX - startX), Math.abs(endY - startY), stroke,color);
-                break;
-            default:
-            console.log("Opción no reconocida");
-            break;
-        }
-    }  
+        }  
+    }
 }
 function stopDrawing(event) {
     if(isDrawing){
@@ -221,7 +322,8 @@ function stopDrawing(event) {
         }
         if(type!=1){
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-        }          const { x, y } = getCoordinates(event);
+        }          
+        const { x, y } = getCoordinates(event);
         const endX = x;
         const endY = y;
         switch (type) {
@@ -233,6 +335,7 @@ function stopDrawing(event) {
             case 3:
             case 4:
             case 6:
+            case 9:
                 agregarDatos(last,startX, startY, endX, endY);
                 drawFigures();
                 break;
@@ -242,79 +345,149 @@ function stopDrawing(event) {
                 break;
             case 7:
             case 8:
-            case 9:
                 agregarDatos(last,startX, startY, Math.abs(endX - startX), Math.abs(endY - startY));
                 drawFigures();
                 break;
+            case 11:
+                if(sKey!=0){//----------------move---------------//
+                    const currentx= endX - startX; 
+                    const currenty= endY - startY;
+                    switch (datos[sKey][0].type) {
+                        case 1:
+                            for (let i = 0; i < datos[sKey].length; i++) {
+                                drawLineBresenham(datos[sKey][i].x1 + currentx, datos[sKey][i].y1 + currenty, datos[sKey][i].x2 + currentx, datos[sKey][i].y2 + currenty, datos[sKey][i].stroke,datos[sKey][i].color);
+                                actualizarDatos(sKey,i,datos[sKey][i].x1 + currentx, datos[sKey][i].y1 + currenty, datos[sKey][i].x2 + currentx, datos[sKey][i].y2 + currenty, datos[sKey][i].stroke,0,datos[sKey][i].color);
+                            }
+                            break;
+                        case 2:
+                        case 3:
+                        case 4:
+                        case 6:
+                        case 9:
+                            actualizarDatos(sKey,0,datos[sKey][0].x1 + currentx, datos[sKey][0].y1 + currenty, datos[sKey][0].x2 + currentx, datos[sKey][0].y2 + currenty, datos[sKey][0].stroke,0,datos[sKey][0].color);
+                            drawFigures();
+                            break;
+                        case 5:
+                            actualizarDatos(sKey,0,datos[sKey][0].x1 + currentx, datos[sKey][0].y1 + currenty, datos[sKey][0].x2 + currentx, 0, datos[sKey][0].stroke,0,datos[sKey][0].color);
+                            drawFigures();
+                            break;
+                        case 7:
+                        case 8:
+                            actualizarDatos(sKey,0,datos[sKey][0].x1 + currentx, datos[sKey][0].y1 + currenty, datos[sKey][0].x2 , datos[sKey][0].y2 , datos[sKey][0].stroke,0,datos[sKey][0].color);
+                            drawFigures();
+                            break;
+                        default:
+                            console.log("Opción no reconocida");
+                            break;
+                        }
+                }
+                sKey =0;
+                drawFigures();
+            case 12:
+                const slope = (datos[sKey][0].y2 - datos[sKey][0].y1) / (datos[sKey][0].x2 - datos[sKey][0].x1);
+                        const angle = Math.atan(slope);
+                        const currentx = endX - startX; 
+                        const currenty = endY - startY;
+                        const current = Math.round((currentx +currenty) /2);
+                        const deltaX = Math.round(current * Math.cos(angle));
+                        const deltaY = Math.round(current * Math.sin(angle));
+                        const current2 = Math.round((deltaX +deltaY) /2);
+                        if(sKey!=0){//----------------move---------------//
+                            const currentx= endX - startX; 
+                            const currenty= endY - startY;
+                            switch (datos[sKey][0].type) {
+                                case 1:
+                                    for (let i = 0; i < datos[sKey].length; i++) {
+                                        drawLineBresenham(datos[sKey][i].x1 + currentx, datos[sKey][i].y1 + currenty, datos[sKey][i].x2 + currentx, datos[sKey][i].y2 + currenty, datos[sKey][i].stroke,datos[sKey][i].color);
+                                        actualizarDatos(sKey,i,datos[sKey][i].x1 + currentx, datos[sKey][i].y1 + currenty, datos[sKey][i].x2 + currentx, datos[sKey][i].y2 + currenty, datos[sKey][i].stroke,0,datos[sKey][i].color);
+                                    }
+                                    break;
+                                case 2:
+                                case 3:
+                                case 4:
+                                case 6:
+                                case 9:
+                                    actualizarDatos(sKey,0,datos[sKey][0].x1 , datos[sKey][0].y1 , datos[sKey][0].x2 + deltaX, datos[sKey][0].y2 + deltaY, datos[sKey][0].stroke,0,datos[sKey][0].color);
+                                    drawFigures();
+                                    break;
+                                case 5:
+                                    actualizarDatos(sKey,0,datos[sKey][0].x1 , datos[sKey][0].y1 , datos[sKey][0].x2 + currentx,0,  datos[sKey][0].stroke,0,datos[sKey][0].color);
+                                    drawFigures();
+                                    break;
+                                case 7:
+                                case 8:
+                                    actualizarDatos(sKey,0,datos[sKey][0].x1 , datos[sKey][0].y1 , datos[sKey][0].x2 + current2, datos[sKey][0].y2 + current2 , datos[sKey][0].stroke,0,datos[sKey][0].color);
+                                    drawFigures();
+                                    break;
+                                default:
+                                    console.log("Opción no reconocida");
+                                    break;
+                                }
+                        }
+                        sKey =0;
+                        drawFigures();
+                break;
             default:
-            console.log("Opción no reconocida");
-            break;
-        }  
-        isDrawing =false;
+                console.log("Opción no reconocida");
+                break;
+        
+    }     
+    isDrawing =false;
     }
 }
 //--------------------------dibujar en el canva-----------------//
 function selectFigure(x,y){
-    var llaves = Object.keys(datos);
-    var longitud = llaves.length;
+    var keys = Object.keys(datos);
+    var longitud = keys.length;
 
     for (var i = longitud + und - 1; i >= 0; i--)  {
-        var llave = llaves[i];
-        if (datos[llave] && datos[llave].length > 0) {
-            for (let i = 0; i < datos[llave].length; i++) {
-                switch (datos[llave][i].type) {
+        var key = keys[i];
+        if (datos[key] && datos[key].length > 0) {
+            for (let i = 0; i < datos[key].length; i++) {
+                switch (datos[key][i].type) {
                     case 1:
-                        if(selectLine(datos[llave][i].x1,datos[llave][i].y1,datos[llave][i].x2,datos[llave][i].y2,x,y,datos[llave][i].stroke)){
-                            console.log('fierro por la costera');
-                            return;
+                        if(selectLine(datos[key][i].x1,datos[key][i].y1,datos[key][i].x2,datos[key][i].y2,x,y,datos[key][i].stroke)){
+                            return key;
                         }
                         break;
                     case 2:
-                        if(selectLine(datos[llave][i].x1,datos[llave][i].y1,datos[llave][i].x2,datos[llave][i].y2,x,y,datos[llave][i].stroke)){
-                            console.log('fierro por la costera');
-                            return;
+                        if(selectLine(datos[key][i].x1,datos[key][i].y1,datos[key][i].x2,datos[key][i].y2,x,y,datos[key][i].stroke)){
+                            return key;
                         }
                         break;
                     case 3:
-                        if(selectCircle(datos[llave][i].x1,datos[llave][i].y1,datos[llave][i].x2,datos[llave][i].y2,x,y,datos[llave][i].stroke)){
-                            console.log('fierro por la costera');
-                            return;
+                        if(selectCircle(datos[key][i].x1,datos[key][i].y1,datos[key][i].x2,datos[key][i].y2,x,y,datos[key][i].stroke)){
+                            return key;
                         }
                         break;
                     case 4: 
-                        if(selectRectangle(datos[llave][i].x1,datos[llave][i].y1,datos[llave][i].x2,datos[llave][i].y2,x,y,datos[llave][i].stroke)){
-                            console.log('fierro por la costera');
-                            return;
+                        if(selectRectangle(datos[key][i].x1,datos[key][i].y1,datos[key][i].x2,datos[key][i].y2,x,y,datos[key][i].stroke)){
+                            return key;
                         }                        
                         break;
                     case 5:
-                        if(selectSquare(datos[llave][i].x1,datos[llave][i].y1,datos[llave][i].x2,x,y,datos[llave][i].stroke)){
-                            console.log('fierro por la costera');
-                            return;
+                        if(selectSquare(datos[key][i].x1,datos[key][i].y1,datos[key][i].x2,x,y,datos[key][i].stroke)){
+                            return key;
                         }                           
                         break;
                     case 6:
-                        if(selectPolygon(datos[llave][i].x1,datos[llave][i].y1,datos[llave][i].x2,datos[llave][i].y2,x,y,datos[llave][i].stroke, sides[llave])){
-                            console.log('fierro por la costera');
-                            return;
+                        if(selectPolygon(datos[key][i].x1,datos[key][i].y1,datos[key][i].x2,datos[key][i].y2,x,y,datos[key][i].stroke, sides[key])){
+                            return key;
                         }                             
                         break;
                     case 7:
-                        if(selectEllipse(datos[llave][i].x1,datos[llave][i].y1,datos[llave][i].x2,datos[llave][i].y2,x,y,datos[llave][i].stroke)){
-                            console.log('fierro por la costera');
-                            return;
+                        if(selectEllipse(datos[key][i].x1,datos[key][i].y1,datos[key][i].x2,datos[key][i].y2,x,y,datos[key][i].stroke)){
+                            return key;
                         }                             
                         break;
                     case 8:
-                        if(selectRombo(datos[llave][i].x1,datos[llave][i].y1,datos[llave][i].x2,datos[llave][i].y2,x,y,datos[llave][i].stroke)){
-                            console.log('fierro por la costera');
-                            return;
+                        if(selectRombo(datos[key][i].x1,datos[key][i].y1,datos[key][i].x2,datos[key][i].y2,x,y,datos[key][i].stroke)){
+                            return key;
                         }                             
                         break;
                     case 9:
-                        if(selectTrapezoid(datos[llave][i].x1,datos[llave][i].y1,datos[llave][i].x2,datos[llave][i].y2,x,y,datos[llave][i].stroke)){
-                            console.log('fierro por la costera');
-                            return;
+                        if(selectTrapezoid(datos[key][i].x1,datos[key][i].y1,datos[key][i].x2,datos[key][i].y2,x,y,datos[key][i].stroke)){
+                            return key;
                         }       
                     default:
                         break;
@@ -322,42 +495,43 @@ function selectFigure(x,y){
             }
         }
     }
+    return 0;
 }
 function drawFigures() {
-    var llaves = Object.keys(datos);
-    var longitud = llaves.length;
+    var keys = Object.keys(datos);
+    var longitud = keys.length;
 
     for (var i = 0; i < (longitud +und) ; i++) {
-        var llave = llaves[i];
-        if (datos[llave] && datos[llave].length > 0) {
-            for (let i = 0; i < datos[llave].length; i++) {
-                switch (datos[llave][i].type) {
+        var key = keys[i];
+        if (datos[key] && datos[key].length > 0 && key !=sKey) {
+            for (let i = 0; i < datos[key].length; i++) {
+                switch (datos[key][i].type) {
                     case 1:
-                        drawLineBresenham(datos[llave][i].x1,datos[llave][i].y1,datos[llave][i].x2,datos[llave][i].y2,datos[llave][i].stroke,datos[llave][i].color);
+                        drawLineBresenham(datos[key][i].x1,datos[key][i].y1,datos[key][i].x2,datos[key][i].y2,datos[key][i].stroke,datos[key][i].color);
                         break;
                     case 2:
-                        drawLineBresenham(datos[llave][i].x1,datos[llave][i].y1,datos[llave][i].x2,datos[llave][i].y2,datos[llave][i].stroke,datos[llave][i].color);
+                        drawLineBresenham(datos[key][i].x1,datos[key][i].y1,datos[key][i].x2,datos[key][i].y2,datos[key][i].stroke,datos[key][i].color);
                         break;
                     case 3:
-                        drawCircle(datos[llave][i].x1,datos[llave][i].y1,datos[llave][i].x2,datos[llave][i].y2,datos[llave][i].stroke,datos[llave][i].color);
+                        drawCircle(datos[key][i].x1,datos[key][i].y1,datos[key][i].x2,datos[key][i].y2,datos[key][i].stroke,datos[key][i].color);
                         break;
                     case 4:
-                        rectangle(datos[llave][i].x1,datos[llave][i].y2,datos[llave][i].x2,datos[llave][i].y1,datos[llave][i].stroke,datos[llave][i].color);
+                        rectangle(datos[key][i].x1,datos[key][i].y2,datos[key][i].x2,datos[key][i].y1,datos[key][i].stroke,datos[key][i].color);
                         break;
                     case 5:
-                        square(datos[llave][i].x1,datos[llave][i].y1,datos[llave][i].x2,datos[llave][i].stroke,datos[llave][i].color);
+                        square(datos[key][i].x1,datos[key][i].y1,datos[key][i].x2,datos[key][i].stroke,datos[key][i].color);
                         break;
                     case 6:
-                        drawpolygon(datos[llave][i].x1,datos[llave][i].y1,datos[llave][i].x2,datos[llave][i].y2,datos[llave][i].stroke,datos[llave][i].color, sides[llave]);
+                        drawpolygon(datos[key][i].x1,datos[key][i].y1,datos[key][i].x2,datos[key][i].y2,datos[key][i].stroke,datos[key][i].color, sides[key]);
                         break;
                     case 7:
-                        drawEllipse(datos[llave][i].x1,datos[llave][i].y1,datos[llave][i].x2,datos[llave][i].y2,datos[llave][i].stroke,datos[llave][i].color);
+                        drawEllipse(datos[key][i].x1,datos[key][i].y1,datos[key][i].x2,datos[key][i].y2,datos[key][i].stroke,datos[key][i].color);
                         break;
                     case 8:
-                        drawRombo(datos[llave][i].x1,datos[llave][i].y1,datos[llave][i].x2,datos[llave][i].y2,datos[llave][i].stroke,datos[llave][i].color);
+                        drawRombo(datos[key][i].x1,datos[key][i].y1,datos[key][i].x2,datos[key][i].y2,datos[key][i].stroke,datos[key][i].color);
                         break;
                     case 9:
-                        drawTrapezoid(datos[llave][i].x1,datos[llave][i].y1,datos[llave][i].x2,datos[llave][i].y2,datos[llave][i].stroke,datos[llave][i].color);
+                        drawTrapezoid(datos[key][i].x1,datos[key][i].y1,datos[key][i].x2,datos[key][i].y2,datos[key][i].stroke,datos[key][i].color);
                     default:
                         break;
                 }

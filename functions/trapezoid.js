@@ -1,21 +1,29 @@
 import drawLineBresenham,{selectLine} from "./bresenham.js";
 
-function drawTrapezoid(x1, y1, topWidth, bottomWidth, str, col) {
-    const height= topWidth;
+function drawTrapezoid(startX, startY, x, y, str,col) {
+    var topLeftX = startX;
+    var topLeftY = startY;
+    var topRightX = x;
+    var bottomRightX = x + (x - startX) / 2;
+    var bottomRightY = y;
+    var bottomLeftX = startX - (x - startX) / 2;
 
-    // Draw top line
-    drawLineBresenham(x1 - topWidth, y1, x1 + topWidth, y1, str, col);
-    // Draw right slant line
-    drawLineBresenham(x1 + topWidth, y1, x1 + bottomWidth, y1 + height, str, col);
-    // Draw bottom line
-    drawLineBresenham(x1 + bottomWidth, y1 + height, x1 - bottomWidth, y1 + height, str, col);
-    // Draw left slant line
-    drawLineBresenham(x1 - bottomWidth, y1 + height, x1 - topWidth, y1, str, col);
+    // Dibujar el trapecio utilizando la función de línea de Bresenham
+    drawLineBresenham(Math.round(topLeftX), Math.round(topLeftY), Math.round(topRightX), Math.round(topLeftY),str,col); // Borde superior
+    drawLineBresenham(Math.round(topRightX), Math.round(topLeftY), Math.round(bottomRightX), Math.round(bottomRightY),str,col); // Borde derecho
+    drawLineBresenham(Math.round(bottomRightX), Math.round(bottomRightY), Math.round(bottomLeftX), Math.round(bottomRightY),str,col); // Borde inferior
+    drawLineBresenham(Math.round(bottomLeftX), Math.round(bottomRightY), Math.round(topLeftX), Math.round(topLeftY),str,col); // Borde izquierdo
 }
-function selectTrapezoid(x1, y1, topWidth, bottomWidth, x,y,str) {
-    const height= topWidth;
+function selectTrapezoid(startX, startY, x, y, str,) {
+    var topLeftX = startX;
+    var topLeftY = startY;
+    var topRightX = x;
+    var bottomRightX = x + (x - startX) / 2;
+    var bottomRightY = y;
+    var bottomLeftX = startX - (x - startX) / 2;
 
-    if(selectLine(x1 - topWidth, y1, x1 + topWidth, y1,x,y, str)||selectLine(x1 + topWidth, y1, x1 + bottomWidth, y1 + height,x,y,str)||selectLine(x1 + bottomWidth, y1 + height, x1 - bottomWidth, y1 + height,x,y,str)||selectLine(x1 - bottomWidth, y1 + height, x1 - topWidth, y1,x,y,str)){
+    // Dibujar el trapecio utilizando la función de línea de Bresenham
+    if(selectLine(Math.round(topLeftX), Math.round(topLeftY), Math.round(topRightX), Math.round(topLeftY),x,y, str)||selectLine(Math.round(topRightX), Math.round(topLeftY), Math.round(bottomRightX), Math.round(bottomRightY),x,y,str)||selectLine(Math.round(bottomRightX), Math.round(bottomRightY), Math.round(bottomLeftX), Math.round(bottomRightY),x,y,str)||selectLine(Math.round(bottomLeftX), Math.round(bottomRightY), Math.round(topLeftX), Math.round(topLeftY),x,y,str)){
         return true
     }
 }
