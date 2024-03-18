@@ -18,7 +18,13 @@ body {
   display: flex;
   justify-content: center;
   align-items: center;
-  overflow: hidden;
+  width: 99%;
+}
+::-webkit-scrollbar {
+  display: none;
+}
+::-webkit-scrollbar-track {
+  display: none;
 }
 .josefin-slab {
   font-family: "Josefin Slab", serif;
@@ -28,6 +34,7 @@ body {
 }
 .imgContainer {
   position: absolute;
+  margin: 0%;
   width: 100%;
   height: 100%;
   background-image: url(./img/back.svg);
@@ -44,7 +51,6 @@ body {
   border: 2px solid blue;
   border-radius: 50px;
   margin-top: 0 auto;
-  overflow: hidden; /* Asegura que el canvas no sobresalga del contenedor */
 }
 
 #miCanvas {
