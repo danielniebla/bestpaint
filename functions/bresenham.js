@@ -29,7 +29,7 @@ function selectLine(x1,y1,x2,y2,x,y,s){
     let err = deltax - deltay;
     if(err != 0){
         while (x1 !== x2 || y1 !== y2) {
-            if (x1 >= x - s && x1 <= x + s && y1 >= y - s && y1 <= y + s) {
+            if (x1 >= x - s + 1 && x1 <= x + s + 1 && y1 >= y - s + 1 && y1 <= y + s + 1) {
                 return true;
             }
             let e2 = 2 * err;

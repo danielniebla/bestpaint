@@ -25,6 +25,13 @@ var startX, startY;
 var type = 1;
 var sKey =0;
 var und =0;
+window.addEventListener('load', function() {
+    const contenedor = canvas.parentNode;
+    setTimeout(() => {
+        canvas.width = contenedor.offsetWidth;
+        canvas.height = contenedor.offsetHeight;
+    }, 100);
+}); 
 function updateHexColor() {
     color = colorPicker.value;
 }
@@ -68,7 +75,6 @@ function actualizarDatos(key, index, x1, y1, x2, y2, stroke, layer, color) {
         console.error("No se encontraron datos para la clave proporcionada o el índice proporcionado está fuera de rango.");
     }
 }
-
 function eliminarDatos(key) {
     for(var i = key; i > (key +und) ; i--){
         if (datos[i] && datos[i].length > 0) {
@@ -83,11 +89,23 @@ function undo(){
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     drawFigures();
 }
-function endo(){
+function redo(){
     und+=1;
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     drawFigures();
 }
+function save() {
+    var datosCombinados = { figuras: datos, lados: sides };
+    const datosJSON = JSON.stringify(datosCombinados);
+    const blob = new Blob([datosJSON], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const enlaceDescarga = document.createElement('a');
+    enlaceDescarga.href = url;
+    enlaceDescarga.download = 'datos.json'; // Nombre del archivo
+    enlaceDescarga.click();
+    URL.revokeObjectURL(url);
+}
+
 //--------------------------------eventos-------------------------------//
 document.getElementById("1").addEventListener("click", function () {type = 1, noB();});
 document.getElementById("2").addEventListener("click", function () {type = 2, noB();});
@@ -107,11 +125,20 @@ document.getElementById("colorPicker").addEventListener("input", updateHexColor)
 document.getElementById("strokeWidth").addEventListener("input", function(event) {var strokeValue = parseInt(event.target.value, 10); updateStroke(strokeValue);});
 document.getElementById("sides").addEventListener("input", function(event) {var sideValue = parseInt(event.target.value, 10); updateside(sideValue);});
 document.getElementById("undo").addEventListener("click", function () {undo();});
-document.getElementById("endo").addEventListener("click", function () {endo();});
+document.getElementById("redo").addEventListener("click", function () {redo();});
+document.getElementById("save").addEventListener("click", function () {save();});
 document.getElementById("clean").addEventListener("click", function () {clean();});
 document.getElementById("toggleButton").addEventListener("click", function () {toggleElement();});
 document.getElementById("toggleButton2").addEventListener("click", function () {toggleElement2();});
-
+document.getElementById('archivoInput').addEventListener('change', function(event) {
+    const archivo = event.target.files[0];
+    if (archivo && archivo.type === 'application/json') {
+        // Si el archivo seleccionado es un JSON, cargar los datos
+        cargarDatosDesdeJSON(archivo);
+    } else {
+        console.error('El archivo seleccionado no es un JSON.');
+    }
+});
 canvas.addEventListener("mousedown", startDrawing);
 canvas.addEventListener("mousemove", draw);
 canvas.addEventListener("mouseup", stopDrawing);
@@ -120,6 +147,18 @@ canvas.addEventListener("touchstart", (event) => {event.preventDefault();event.s
 canvas.addEventListener("touchmove", (event) => {event.preventDefault();event.stopPropagation();draw(event.touches[0]);});
 canvas.addEventListener("touchend", (event) => {event.preventDefault();event.stopPropagation();stopDrawing(event.changedTouches[0]);});
 //---------------------------------funciones de los eventos-------------------//
+function cargarDatosDesdeJSON(archivo) {
+    const lector = new FileReader();
+    lector.onload = function(event) {
+        const datosJSON = event.target.result;
+        var datosCombinados = JSON.parse(datosJSON);
+        datos = datosCombinados.figuras;
+        sides = datosCombinados.lados;
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        drawFigures();
+    };
+    lector.readAsText(archivo);
+}
 function toggleElement() {
     var elemento = document.getElementById("elementoOculto");
     

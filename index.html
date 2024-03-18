@@ -20,22 +20,25 @@
         <div class="grid">
             <div class="control"> 
                 <button class="but " id="toggleButton" onclick="event.preventDefault();">
-                    <p>opciones</p>
-                    <img src="./img/ajuste.png" alt="" class="mini-icon">
+                    <p>Figuras</p>
+                    <img src="./img/shapes.svg" alt="" class="mini-icon">
                 </button>
                 <div class="modal " class="mod" id="elementoOculto">
                     <h3 class="col"> 
                         Stroke
                         <input type="number" id="strokeWidth" value="3" onchange="event.preventDefault();">
                     </h3>
-                    <input type="color" id="colorPicker" value="#000000" onchange="event.preventDefault();">
-                    <img src="./img/lapiz.png" alt="" id="1" class="icon lapiz" onclick="event.preventDefault();">
-                    <img src="./img/segmento-de-linea.png" alt="" id="2" class="icon linea" onclick="event.preventDefault();">
-                    <img src="./img/circulo-dibujado-a-mano-luna.png" alt="" id="3" class="icon" onclick="event.preventDefault();">
-                    <img src="./img/forma.png" alt="" id="4" class="icon" onclick="event.preventDefault();">
-                    <img src="./img/contorno-de-forma-cuadrada-dibujada-a-mano.png" alt="" id="5" class="icon" onclick="event.preventDefault();">
+                    <h3 class="col">
+                        Color
+                        <input type="color" id="colorPicker" value="#000000" onchange="event.preventDefault();">
+                    </h3>
+                    <img src="./img/Draw.svg" alt="" id="1" class="icon lapiz" onclick="event.preventDefault();">
+                    <img src="./img/line.svg" alt="" id="2" class="icon linea" onclick="event.preventDefault();">
+                    <img src="./img/circle.svg" alt="" id="3" class="icon" onclick="event.preventDefault();">
+                    <img src="./img/rectangle.svg" alt="" id="4" class="icon" onclick="event.preventDefault();">
+                    <img src="./img/square.svg" alt="" id="5" class="icon" onclick="event.preventDefault();">
                     <div class="col bottom" >
-                        <img src="./img/poligono.png" alt="" id="6" class="icon" onclick="event.preventDefault();">
+                        <img src="./img/pentagon.svg" alt="" id="6" class="icon" onclick="event.preventDefault();">
                         <input type="number" class="strokeWidth" id="sides" value="5" onchange="event.preventDefault();">
                     </div>
                     <img src="./img/elipse.png" alt="" id="7" class="icon" onclick="event.preventDefault();">
@@ -45,11 +48,13 @@
                 </div>
             </div>
             <div class="space">
-                <canvas id="miCanvas" width="900" height="650"></canvas>
+                <div id="miContenedor">
+                    <canvas id="miCanvas" ></canvas>
+                </div>
                 <div class="flexy bottom">
                     <img src="./img/limpieza.png" alt="" id="clean" class="icon bottom" onclick="event.preventDefault();">
-                    <img src="./img/mover.png" alt="" class="icon bottom" id="11" onclick="event.preventDefault();">
-                    <img src="./img/expandir.png" alt="" class="icon bottom" id="12" onclick="event.preventDefault();">
+                    <img src="./img/move.svg" alt="" class="icon bottom" id="11" onclick="event.preventDefault();">
+                    <img src="./img/resize.svg" alt="" class="icon bottom" id="12" onclick="event.preventDefault();">
                 </div>
             </div>
             <div class="controls">
@@ -58,8 +63,14 @@
                     <img src="./img/ajuste.png" alt="" class="mini-icon">
                 </button>
                 <div class="modal mirror" class="mod" id="elementoOculto2">
-                    <img src="./img/atras.png" alt="" class="icon" id="undo" onclick="event.preventDefault()">
-                    <img src="./img/flecha-correcta.png" alt="" id="endo" class="icon" onclick="event.preventDefault();">
+                    <img src="./img/undo.svg" alt="" class="icon" id="undo" onclick="event.preventDefault()">
+                    <img src="./img/redo.svg" alt="" id="redo" class="icon" onclick="event.preventDefault();">
+                    <img src="./img/save.png" alt="" id="save" class="icon" onclick="event.preventDefault();">
+                    <label for="archivoInput">
+                        <img src="./img/open.svg" alt="" id="oepn" class="icon" onclick="event.preventDefault();">
+                        <br>Abrir
+                        <input type="file" id="archivoInput" accept=".json" style="display:none;" >
+                    </label>
                 </div>
             </div>
         </div>

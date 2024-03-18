@@ -37,13 +37,24 @@ body {
 }
 
 
-canvas {
+#miContenedor {
+  width: 100%;
+  height: 80vh;
   background-color: #fff;
   border: 2px solid blue;
   border-radius: 50px;
   margin-top: 0 auto;
+  overflow: hidden; /* Asegura que el canvas no sobresalga del contenedor */
 }
 
+#miCanvas {
+  width: 100%;
+  height: 100%; /* Ajusta el canvas al tamaño completo del contenedor */
+  display: block; /* Asegura que el canvas se muestre correctamente */
+}
+.archivoInput{
+  display: none;
+}
 .icon {
   width: 50px;
   height: 50px;

@@ -86,10 +86,8 @@ function selectEllipse(x1, y1, x2, y2,x3,y3,str) {
         }
     }
 }
-
 function verify(x1,y1,x,y,s){
-    let rad = Math.round(s / 2);
-    if (x1 >= x - rad && x1 <= x + rad && y1 >= y - rad && y1 <= y + rad) {
+    if (x1 >= x - s + 1 && x1 <= x + s + 1 && y1 >= y - s + 1 && y1 <= y + s + 1) {
         return true;
     }
 }
