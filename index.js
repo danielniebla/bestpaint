@@ -12,6 +12,8 @@ const canvas = document.getElementById("miCanvas");
 export const ctx = canvas.getContext("2d");
 var datos = {}; 
 var sides = {}; 
+var stack = {};
+var cStack =  new Array();
 var colorPicker = document.getElementById("colorPicker");
 var color = colorPicker.value ;
 var bColor= "rgb(255, 255, 255)";
@@ -83,18 +85,125 @@ function eliminarDatos(key) {
             }
         }
     }
+    reorder();
+}
+function reorder(){
+    var datos2 = {}; 
+    var sides2 = {};
+    var index = 0;
+    for (var llave in datos) {
+        if (datos[llave] && datos[llave].length > 0) {
+            index++;
+            datos2[index] = datos[llave];
+            sides2[index] = sides[llave];
+        }
+    }
+    last = index + 1;
+    datos={};
+    sides = {};
+    datos=datos2;
+    sides=sides2;
+    und = 0;
+    stack = {};
+    cStack = {};
+}
+function layers(key, mov){
+    var datos2 = {}; 
+    var sides2 = {};
+    var index = 0;
+    var datos3 = {}; 
+    var sides3 = {};
+    switch(mov){
+        case -2:
+            datos2[1]=datos[key];
+            sides2[1]=sides[key];
+            for (var llave in datos) {
+                if (datos[llave] && datos[llave].length > 0 && llave!=key) {
+                    index++;
+                    datos2[index+1] = datos[llave];
+                    sides2[index+1] = sides[llave];
+                }
+            }
+            last = index + 1;
+            datos={};
+            sides = {};
+            datos=datos2;
+            sides=sides2;
+        break;
+        case -1:
+            datos2[1]=datos[key-1];
+            sides2[1]=sides[key-1];
+            datos[key-1]=datos[key];
+            sides[key-1]=sides[key];
+            datos[key]=datos2[1];
+            sides[key]=sides2[1];
+        break;
+        case 1:
+            datos2[1]=datos[key+1];
+            sides2[1]=sides[key+1];
+            datos[key+1]=datos[key];
+            sides[key+1]=sides[key];
+            datos[key]=datos2[1];
+            sides[key]=sides2[1];
+        break;
+        case 2:
+            datos3[1]=datos[key];
+            sides3[1]=sides[key];
+            for (var llave in datos) {
+                if (datos[llave] && datos[llave].length > 0 && llave!=key) {
+                    index++;
+                    datos2[index] = datos[llave];
+                    sides2[index] = sides[llave];
+                }
+            }
+            index++;
+            datos2[index]=datos3[1];
+            sides2[index]=sides3[1];
+            last = index + 1;
+            datos={};
+            sides = {};
+            datos=datos2;
+            sides=sides2;
+        break;
+        default:
+        console.log('uy quieto');
+        break;
+    }
+    und = 0;
+    stack = {};
+    cStack = {};
+}
+function deleteFigure(k){
+    cStack[und] =k ;
+    stack[und]=JSON.parse(JSON.stringify(datos[k]));
+    und++;
+    datos[k].pop();
 }
 function undo(){
-    und-=1;
+    if(und>0){
+        und--; 
+        datos[cStack[und]]= JSON.parse(JSON.stringify(stack[und]));
+
+        // console.log('a',datos[cStack[und]],'b',stack[und],cStack[und]);
+        // console.log(datos);
+
+    }else{
+        und--;
+    }
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     drawFigures();
 }
 function redo(){
-    und+=1;
+    if(und<=0){
+        und+=1;
+    }
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     drawFigures();
 }
 function save() {
+    if(und!=0){
+        eliminarDatos(last);
+    }
     var datosCombinados = { figuras: datos, lados: sides };
     const datosJSON = JSON.stringify(datosCombinados);
     const blob = new Blob([datosJSON], { type: 'application/json' });
@@ -105,7 +214,6 @@ function save() {
     enlaceDescarga.click();
     URL.revokeObjectURL(url);
 }
-
 //--------------------------------eventos-------------------------------//
 document.getElementById("1").addEventListener("click", function () {type = 1, noB();});
 document.getElementById("2").addEventListener("click", function () {type = 2, noB();});
@@ -119,6 +227,12 @@ document.getElementById("9").addEventListener("click", function () {type = 9, no
 document.getElementById("10").addEventListener("click", function () {type = 1, borrador();});
 document.getElementById("11").addEventListener("click", function () {type = 11;});
 document.getElementById("12").addEventListener("click", function () {type = 12;});
+document.getElementById("13").addEventListener("click", function () {type = 13;});
+document.getElementById("14").addEventListener("click", function () {type = 14;});
+document.getElementById("15").addEventListener("click", function () {type = 15;});
+document.getElementById("16").addEventListener("click", function () {type = 16;});
+document.getElementById("17").addEventListener("click", function () {type = 17;});
+document.getElementById("18").addEventListener("click", function () {type = 18;});
 
 
 document.getElementById("colorPicker").addEventListener("input", updateHexColor);
@@ -139,6 +253,15 @@ document.getElementById('archivoInput').addEventListener('change', function(even
         console.error('El archivo seleccionado no es un JSON.');
     }
 });
+document.getElementById("pdf").addEventListener("click", function () {savePDF();});
+document.addEventListener('keydown', function(event) {
+    if (event.ctrlKey && event.key === 'z') {
+        undo(); // Deshacer al presionar Ctrl + Z
+    } else if (event.ctrlKey && event.key === 'y') {
+        redo(); // Rehacer al presionar Ctrl + Y
+    }
+});
+
 canvas.addEventListener("mousedown", startDrawing);
 canvas.addEventListener("mousemove", draw);
 canvas.addEventListener("mouseup", stopDrawing);
@@ -197,6 +320,7 @@ function clean(){
     last = 0;
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     drawFigures();
+    und=0;
 }
 function getCoordinates(event) {
     const rect = canvas.getBoundingClientRect();
@@ -207,10 +331,67 @@ function getCoordinates(event) {
 //-------------------------------dibujado--------------------------//
 function startDrawing(event) {
     const { x, y } = getCoordinates(event);
-    if(type==11 || type == 12){
-        sKey=selectFigure(x,y);
-    }else if(und==0){
-        last +=1;
+    switch (type) {
+        case 1:
+        case 2:
+        case 3:
+        case 4:
+        case 5:
+        case 6:
+        case 7:
+        case 8:
+        case 9:
+            if(und!=0){
+                eliminarDatos(last);
+                und=0;
+                stack={};
+            }
+            last +=1;
+        break;
+        case 11:
+        case 12:
+        case 13:
+        case 18:
+            if(und<0){
+                eliminarDatos(last);
+            }
+            sKey=selectFigure(x,y);
+            if( sKey !=0&&type==13){
+                deleteFigure(sKey);
+                sKey = 0;
+            }
+        break;
+        case 14:
+            sKey=selectFigure(x,y);
+            if( sKey !=0){
+                layers(sKey,-1);
+                sKey = 0;
+            }
+        break;
+        case 15:
+            sKey=selectFigure(x,y);
+            if( sKey !=0){
+                layers(sKey,1);
+                sKey = 0;
+            }
+        break;
+        case 16:
+            sKey=selectFigure(x,y);
+            if( sKey !=0){
+                layers(sKey,-2);
+                sKey = 0;
+            }
+        break;
+        case 17:
+            sKey=selectFigure(x,y);
+            if( sKey !=0){
+                layers(sKey,2);
+                sKey = 0;
+            }
+        break;
+        default:
+            console.log("Opción no reconocida");
+        break;
     }
     isDrawing =true;
     startX = x;
@@ -317,7 +498,7 @@ function draw(event) {
                                 }
                                 break;
                             case 2:                            
-                                drawLineBresenham(datos[sKey][0].x1 , datos[sKey][0].y1 , datos[sKey][0].x2 + deltaX ,datos[sKey][0].y2 + deltaY, datos[sKey][0].stroke,datos[sKey][0].color);
+                                drawLineBresenham(datos[sKey][0].x1 , datos[sKey][0].y1 , endX,endY, datos[sKey][0].stroke,datos[sKey][0].color);
                                 break;
                             case 3:
                                 drawCircle(datos[sKey][0].x1 , datos[sKey][0].y1 , datos[sKey][0].x2 + deltaX, datos[sKey][0].y2 + deltaY, datos[sKey][0].stroke,datos[sKey][0].color);
@@ -346,7 +527,67 @@ function draw(event) {
                         }
                     }
                 break;
-
+                case 13:
+                break;
+                case 18:
+                   if(sKey!=0){//----------------move---------------//
+                        const centerX = (datos[sKey][0].x1 + datos[sKey][0].x2) / 2;
+                        const centerY = (datos[sKey][0].y1 + datos[sKey][0].y2) / 2;
+                        
+                        // Coordenadas relativas de las esquinas respecto al centro
+                        const relativeStartX = datos[sKey][0].x1 - centerX;
+                        const relativeStartY = datos[sKey][0].y1 - centerY;
+                        const relativeEndX = datos[sKey][0].x2 - centerX;
+                        const relativeEndY = datos[sKey][0].y2 - centerY;
+                        
+                        const angle = Math.atan2(relativeEndY, relativeEndX) - Math.atan2(relativeStartY, relativeStartX);
+                        // Rotación
+                        const rotatedStartX = relativeStartX * Math.cos(angle) - relativeStartY * Math.sin(angle);
+                        const rotatedStartY = relativeStartX * Math.sin(angle) + relativeStartY * Math.cos(angle);
+                        const rotatedEndX = relativeEndX * Math.cos(angle) - relativeEndY * Math.sin(angle);
+                        const rotatedEndY = relativeEndX * Math.sin(angle) + relativeEndY * Math.cos(angle);
+                        
+                        // Coordenadas absolutas de las esquinas después de la rotación
+                        const finalStartX = Math.round(rotatedStartX + centerX);
+                        const finalStartY = Math.round(rotatedStartY + centerX);
+                        const finalEndX = Math.round(rotatedEndX + centerX);
+                        const finalEndY = Math.round(rotatedEndY + centerX);
+                        switch (datos[sKey][0].type) {
+                            case 1:
+                                for (let i = 0; i < datos[sKey].length; i++) {
+                                    drawLineBresenham(datos[sKey][i].x1 , datos[sKey][i].y1 , datos[sKey][i].x2 + current, datos[sKey][i].y2 + current, datos[sKey][i].stroke,datos[sKey][i].color);
+                                }
+                                break;
+                            case 2:                            
+                                drawLineBresenham(finalStartX , finalStartY , finalEndX,finalEndY, datos[sKey][0].stroke,datos[sKey][0].color);
+                                break;
+                            case 3:
+                                drawCircle(finalStartX, finalStartY , finalEndX, finalEndY, datos[sKey][0].stroke,datos[sKey][0].color);
+                                break;
+                            case 4:
+                                rectangle(finalStartX , finalStartY , finalEndX, finalEndY, datos[sKey][0].stroke,datos[sKey][0].color);
+                                break;
+                            case 5:
+                                square(finalStartX , finalStartY , finalEndX,  datos[sKey][0].stroke,datos[sKey][0].color);
+                                break;
+                            case 6:
+                                drawpolygon(finalStartX, finalStartY , finalEndX, finalEndY, datos[sKey][0].stroke,datos[sKey][0].color,sides[sKey]);
+                                break;
+                            case 7:
+                                drawEllipse(finalStartX , finalStartY , finalEndX, finalEndY, datos[sKey][0].stroke,datos[sKey][0].color);
+                                break;
+                            case 8:
+                                drawRombo(finalStartX, finalStartY , finalEndX, finalEndY, datos[sKey][0].stroke,datos[sKey][0].color);
+                                break;
+                            case 9:
+                                drawTrapezoid(finalStartX, finalStartY , finalEndX, finalEndY, datos[sKey][0].stroke,datos[sKey][0].color);
+                                break;
+                            default:
+                            console.log("Opción no reconocida");
+                            break;
+                        }
+                    }
+                break;
                 default:
                 console.log("Opción no reconocida");
                 break;
@@ -355,21 +596,13 @@ function draw(event) {
 }
 function stopDrawing(event) {
     if(isDrawing){
-        if(und!=0){
-            eliminarDatos(last);
-            und=0;
-        }
-        if(type!=1){
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-        }          
+        
+        ctx.clearRect(0, 0, canvas.width, canvas.height);         
         const { x, y } = getCoordinates(event);
         const endX = x;
         const endY = y;
         switch (type) {
             case 1:
-                drawLineBresenham(startX, startY, endX, endY, stroke,color);
-                agregarDatos(last,startX, startY, endX, endY);
-                break;
             case 2:
             case 3:
             case 4:
@@ -389,14 +622,26 @@ function stopDrawing(event) {
                 break;
             case 11:
                 if(sKey!=0){//----------------move---------------//
-                    const currentx= endX - startX; 
-                    const currenty= endY - startY;
+                // console.log(sKey);
+                cStack[und] =sKey ;
+                stack[und]=JSON.parse(JSON.stringify(datos[sKey]));
+                // console.log('c',cStack[und], 's',stack[und],'k',sKey);
+                und++; 
+                const slope = (datos[sKey][0].y2 - datos[sKey][0].y1) / (datos[sKey][0].x2 - datos[sKey][0].x1);
+                const angle = Math.atan(slope);
+                        const currentx = endX - startX; 
+                        const currenty = endY - startY;
+                        const current = Math.round((currentx +currenty) /2);
+                        const deltaX = Math.round(current * Math.cos(angle));
+                        const deltaY = Math.round(current * Math.sin(angle));
+                        const current2 = Math.round((deltaX +deltaY) /2);
                     switch (datos[sKey][0].type) {
                         case 1:
                             for (let i = 0; i < datos[sKey].length; i++) {
                                 drawLineBresenham(datos[sKey][i].x1 + currentx, datos[sKey][i].y1 + currenty, datos[sKey][i].x2 + currentx, datos[sKey][i].y2 + currenty, datos[sKey][i].stroke,datos[sKey][i].color);
                                 actualizarDatos(sKey,i,datos[sKey][i].x1 + currentx, datos[sKey][i].y1 + currenty, datos[sKey][i].x2 + currentx, datos[sKey][i].y2 + currenty, datos[sKey][i].stroke,0,datos[sKey][i].color);
                             }
+                            // console.log('c',datos[sKey]);
                             break;
                         case 2:
                         case 3:
@@ -423,17 +668,21 @@ function stopDrawing(event) {
                 sKey =0;
                 drawFigures();
             case 12:
-                const slope = (datos[sKey][0].y2 - datos[sKey][0].y1) / (datos[sKey][0].x2 - datos[sKey][0].x1);
-                        const angle = Math.atan(slope);
-                        const currentx = endX - startX; 
-                        const currenty = endY - startY;
-                        const current = Math.round((currentx +currenty) /2);
-                        const deltaX = Math.round(current * Math.cos(angle));
-                        const deltaY = Math.round(current * Math.sin(angle));
-                        const current2 = Math.round((deltaX +deltaY) /2);
+                
                         if(sKey!=0){//----------------move---------------//
-                            const currentx= endX - startX; 
-                            const currenty= endY - startY;
+                            // console.log(sKey);
+                            cStack[und] =sKey ;
+                            stack[und]=JSON.parse(JSON.stringify(datos[sKey]));
+                            // console.log('c',cStack[und], 's',stack[und],'k',sKey);
+                            und++; 
+                            const slope = (datos[sKey][0].y2 - datos[sKey][0].y1) / (datos[sKey][0].x2 - datos[sKey][0].x1);
+                            const angle = Math.atan(slope);
+                            const currentx = endX - startX; 
+                            const currenty = endY - startY;
+                            const current = Math.round((currentx +currenty) /2);
+                            const deltaX = Math.round(current * Math.cos(angle));
+                            const deltaY = Math.round(current * Math.sin(angle));
+                            const current2 = Math.round((deltaX +deltaY) /2);
                             switch (datos[sKey][0].type) {
                                 case 1:
                                     for (let i = 0; i < datos[sKey].length; i++) {
@@ -466,6 +715,14 @@ function stopDrawing(event) {
                         sKey =0;
                         drawFigures();
                 break;
+
+            case 13:
+            case 14:
+            case 15:
+            case 16:
+            case 17:
+            drawFigures();
+            break;
             default:
                 console.log("Opción no reconocida");
                 break;
@@ -479,53 +736,62 @@ function selectFigure(x,y){
     var keys = Object.keys(datos);
     var longitud = keys.length;
 
-    for (var i = longitud + und - 1; i >= 0; i--)  {
+    for (var i = longitud + und ; i >= 0; i--)  {
         var key = keys[i];
         if (datos[key] && datos[key].length > 0) {
             for (let i = 0; i < datos[key].length; i++) {
                 switch (datos[key][i].type) {
                     case 1:
                         if(selectLine(datos[key][i].x1,datos[key][i].y1,datos[key][i].x2,datos[key][i].y2,x,y,datos[key][i].stroke)){
+                            // console.log('key',key);
                             return key;
                         }
                         break;
                     case 2:
                         if(selectLine(datos[key][i].x1,datos[key][i].y1,datos[key][i].x2,datos[key][i].y2,x,y,datos[key][i].stroke)){
+                            // console.log('key',key);
                             return key;
                         }
                         break;
                     case 3:
                         if(selectCircle(datos[key][i].x1,datos[key][i].y1,datos[key][i].x2,datos[key][i].y2,x,y,datos[key][i].stroke)){
+                            // console.log('key',key);
                             return key;
                         }
                         break;
                     case 4: 
                         if(selectRectangle(datos[key][i].x1,datos[key][i].y1,datos[key][i].x2,datos[key][i].y2,x,y,datos[key][i].stroke)){
+                            // console.log('key',key);
                             return key;
                         }                        
                         break;
                     case 5:
                         if(selectSquare(datos[key][i].x1,datos[key][i].y1,datos[key][i].x2,x,y,datos[key][i].stroke)){
+                            // console.log('key',key);
                             return key;
                         }                           
                         break;
                     case 6:
                         if(selectPolygon(datos[key][i].x1,datos[key][i].y1,datos[key][i].x2,datos[key][i].y2,x,y,datos[key][i].stroke, sides[key])){
+                            // console.log('key',key);
                             return key;
                         }                             
                         break;
                     case 7:
                         if(selectEllipse(datos[key][i].x1,datos[key][i].y1,datos[key][i].x2,datos[key][i].y2,x,y,datos[key][i].stroke)){
+                            // console.log('key',key);
                             return key;
                         }                             
                         break;
                     case 8:
                         if(selectRombo(datos[key][i].x1,datos[key][i].y1,datos[key][i].x2,datos[key][i].y2,x,y,datos[key][i].stroke)){
+                            // console.log('key',key);
                             return key;
                         }                             
                         break;
                     case 9:
                         if(selectTrapezoid(datos[key][i].x1,datos[key][i].y1,datos[key][i].x2,datos[key][i].y2,x,y,datos[key][i].stroke)){
+                            // console.log('key',key);
                             return key;
                         }       
                     default:

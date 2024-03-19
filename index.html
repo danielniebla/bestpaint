@@ -9,6 +9,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Josefin+Slab:ital@1&display=swap" rel="stylesheet">
     <title>Ravenclaw Paint</title>
+    <link rel="icon" href="./img/fav-icon.png" type="image/x-icon">
     <link rel="stylesheet" href="index.css">
 </head>
 
@@ -32,19 +33,19 @@
                         Color
                         <input type="color" id="colorPicker" value="#000000" onchange="event.preventDefault();">
                     </h3>
-                    <img src="./img/Draw.svg" alt="" id="1" class="icon lapiz" onclick="event.preventDefault();">
-                    <img src="./img/line.svg" alt="" id="2" class="icon linea" onclick="event.preventDefault();">
-                    <img src="./img/circle.svg" alt="" id="3" class="icon" onclick="event.preventDefault();">
-                    <img src="./img/rectangle.svg" alt="" id="4" class="icon" onclick="event.preventDefault();">
-                    <img src="./img/square.svg" alt="" id="5" class="icon" onclick="event.preventDefault();">
+                    <img src="./img/Draw.svg" alt="dibujar" id="1" class="icon lapiz" onclick="event.preventDefault();">
+                    <img src="./img/line.svg" alt="linea" id="2" class="icon linea" onclick="event.preventDefault();">
+                    <img src="./img/circle.svg" alt="circulo" id="3" class="icon" onclick="event.preventDefault();">
+                    <img src="./img/rectangle.svg" alt="rectangulo" id="4" class="icon" onclick="event.preventDefault();">
+                    <img src="./img/square.svg" alt="cuadrado" id="5" class="icon" onclick="event.preventDefault();">
                     <div class="col bottom" >
-                        <img src="./img/pentagon.svg" alt="" id="6" class="icon" onclick="event.preventDefault();">
+                        <img src="./img/pentagon.svg" alt="poligono" id="6" class="icon" onclick="event.preventDefault();">
                         <input type="number" class="strokeWidth" id="sides" value="5" onchange="event.preventDefault();">
                     </div>
-                    <img src="./img/elipse.png" alt="" id="7" class="icon" onclick="event.preventDefault();">
-                    <img src="./img/rombo.png" id="8" alt="" class="icon" onclick="event.preventDefault();">
-                    <img src="./img/trapecio.png" id="9" class="icon" onclick="event.preventDefault();" alt="">
-                    <img src="./img/borrador.png" alt="" class="icon" id="10" onclick="event.preventDefault();">
+                    <img src="./img/elipse.png" alt="elipse" id="7" class="icon" onclick="event.preventDefault();">
+                    <img src="./img/rombo.png" id="8" alt="rombo" class="icon" onclick="event.preventDefault();">
+                    <img src="./img/trapecio.png" id="9" class="icon" onclick="event.preventDefault();" alt="trapesio">
+                    <img src="./img/borrador.png" alt="borrador" class="icon" id="10" onclick="event.preventDefault();">
                 </div>
             </div>
             <div class="space">
@@ -55,6 +56,7 @@
                     <img src="./img/limpieza.png" alt="" id="clean" class="icon bottom" onclick="event.preventDefault();">
                     <img src="./img/move.svg" alt="" class="icon bottom" id="11" onclick="event.preventDefault();">
                     <img src="./img/resize.svg" alt="" class="icon bottom" id="12" onclick="event.preventDefault();">
+                    <img src="./img/rotate.svg" alt="" class="icon bottom" id="18" onclick="event.preventDefault();">
                 </div>
             </div>
             <div class="controls">
@@ -71,6 +73,12 @@
                         <br>Abrir
                         <input type="file" id="archivoInput" accept=".json" style="display:none;" >
                     </label>
+                    <img src="./img/delete.svg" alt="" class="icon bottom" id="13" onclick="event.preventDefault();">
+                    <img src="./img/pdf.svg" alt="" class="icon bottom" id="pdf" onclick="event.preventDefault();">
+                    <img src="./img/left.svg" alt="" class="icon bottom" id="14" onclick="event.preventDefault();">
+                    <img src="./img/right.svg" alt="" class="icon bottom" id="15" onclick="event.preventDefault();">
+                    <img src="./img/toFront.svg" alt="" class="icon bottom" id="16" onclick="event.preventDefault();">
+                    <img src="./img/toBack.svg" alt="" class="icon bottom" id="17" onclick="event.preventDefault();">
                 </div>
             </div>
         </div>
