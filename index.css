@@ -68,6 +68,9 @@ body {
 .icon:hover{
   animation: gelatina 0.6s ease-in-out both; /* Aplica la animación 'gelatina' */
 }
+.modal:hover > :not(:hover),.bottom:hover > :not(:hover){
+  opacity: 0.8;
+}
 .bottom{
   color: white !important;
 }

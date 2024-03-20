@@ -1,96 +1,52 @@
-import drawPixel,{setColor} from "./pixels.js";
-function drawEllipse(x1, y1, x2, y2,str,col) {
-    let x = 0;
-    let y = y2;
-    let a2 = x2 * x2;
-    let b2 = y2 * y2;
-    let d = Math.round(b2 - a2 * y2 + 0.25 * a2);
-    let dx = 2 * b2 * x;
-    let dy = 2 * a2 * y;
-    while (dx < dy) {
-        drawEllipsePoints(x1, y1, x, y,str,col);
-
-        x++;
-        dx += 2 * b2;
-        if (d < 0) {
-            d += b2 * (2 * x + 3);
-        } else {
-            y--;
-            dy -= 2 * a2;
-            d += b2 * (2 * x + 3) + a2 * (-2 * y + 2);
-        }
-    }
-    d = Math.round(b2 * (x + 0.5) * (x + 0.5) + a2 * (y - 1) * (y - 1) - a2 * b2);
-    while (y >= 0) {
-        drawEllipsePoints(x1, y1, x, y,str,col);
-        y--;
-        dy -= 2 * a2;
-        if (d > 0) {
-            d += a2 * (-2 * y + 3);
-        } else {
-            x++;
-            dx += 2 * b2;
-            d += b2 * (2 * x + 2) + a2 * (-2 * y + 3);
-        }
-    }
-}
-function drawEllipsePoints(xc, yc, x, y,str,col) {
+import drawPixel, { setColor } from "./pixels.js";
+function drawEllipse(xc, yc, a, b, str, col, angle = 0) {
     setColor(col);
-    // Dibujar los puntos simétricos en el octante
-    drawPixel(xc + x, yc + y, str);
-    drawPixel(xc - x, yc + y, str);
-    drawPixel(xc + x, yc - y, str);
-    drawPixel(xc - x, yc - y, str);
-}
-function selectEllipsePoints(xc, yc, x, y,x3,y3,str){
-    if(verify(xc + x, yc + y,x3,y3, str)||verify(xc - x, yc + y,x3,y3, str)||verify(xc + x, yc - y,x3,y3, str)||verify(xc - x, yc - y,x3,y3, str)){
-        return true;
-    }
-}
-function selectEllipse(x1, y1, x2, y2,x3,y3,str) {
-    let x = 0;
-    let y = y2;
-    let a2 = x2 * x2;
-    let b2 = y2 * y2;
-    let d = Math.round(b2 - a2 * y2 + 0.25 * a2);
-    let dx = 2 * b2 * x;
-    let dy = 2 * a2 * y;
-    while (dx < dy) {
-        if(selectEllipsePoints(x1, y1, x, y,x3,y3,str)){
-            return true;
-        }
+    let cosAngle = Math.cos(angle);
+    let sinAngle = Math.sin(angle);
+    const points = 1800; // Aumentamos el número de puntos a generar
 
-        x++;
-        dx += 2 * b2;
-        if (d < 0) {
-            d += b2 * (2 * x + 3);
-        } else {
-            y--;
-            dy -= 2 * a2;
-            d += b2 * (2 * x + 3) + a2 * (-2 * y + 2);
-        }
-    }
-    d = Math.round(b2 * (x + 0.5) * (x + 0.5) + a2 * (y - 1) * (y - 1) - a2 * b2);
-    while (y >= 0) {
-        if(selectEllipsePoints(x1, y1, x, y,x3,y3,str)){
-            return true;
-        }
-        y--;
-        dy -= 2 * a2;
-        if (d > 0) {
-            d += a2 * (-2 * y + 3);
-        } else {
-            x++;
-            dx += 2 * b2;
-            d += b2 * (2 * x + 2) + a2 * (-2 * y + 3);
-        }
+    for (let i = 0; i <= points; i++) {
+        let angle = (i * Math.PI * 2) / points;
+        let x = Math.round(a * Math.cos(angle));
+        let y = Math.round(b * Math.sin(angle));
+
+        // Rotar y trasladar los puntos de la elipse
+        let xRotated = Math.round(x * cosAngle - y * sinAngle) + xc;
+        let yRotated = Math.round(x * sinAngle + y * cosAngle) + yc;
+
+        drawPixel(xRotated, yRotated, str);
     }
 }
-function verify(x1,y1,x,y,s){
+
+function selectEllipse(xc, yc, a, b, x3, y3, str, angle = 0) {
+    let cosAngle = Math.cos(angle);
+    let sinAngle = Math.sin(angle);
+    const points = 1800; // Aumentamos el número de puntos a generar
+
+    for (let i = 0; i <= points; i++) {
+        let angle = (i * Math.PI * 2) / points;
+        let x = Math.round(a * Math.cos(angle));
+        let y = Math.round(b * Math.sin(angle));
+
+        // Rotar y trasladar los puntos de la elipse
+        let xRotated = Math.round(x * cosAngle - y * sinAngle) + xc;
+        let yRotated = Math.round(x * sinAngle + y * cosAngle) + yc;
+
+        if (verify(xRotated, yRotated, x3, y3, str)) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+
+function verify(x1, y1, x, y, s) {
     if (x1 >= x - s + 1 && x1 <= x + s + 1 && y1 >= y - s + 1 && y1 <= y + s + 1) {
         return true;
     }
 }
+
 export {
     drawEllipse as default,
     selectEllipse

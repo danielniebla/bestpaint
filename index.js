@@ -1,5 +1,5 @@
 import drawCircle,{selectCircle} from "./functions/circle.js";
-import drawpolygon, { selectPolygon } from "./functions/polygon.js";
+import drawpolygon, { selectPolygon, drawpolygon2 } from "./functions/polygon.js";
 import drawEllipse, { selectEllipse } from "./functions/elipse.js";
 import square, { selectSquare } from "./functions/square.js";
 import rectangle, { selectRectangle } from "./functions/rectangle.js";
@@ -20,7 +20,7 @@ var bColor= "rgb(255, 255, 255)";
 var erase = false;
 var stroke =3;
 var isDrawing = false;
-var layer = 1;
+var layer = 0;
 var last = 0;
 var numSides = 5;
 var startX, startY;   
@@ -78,13 +78,11 @@ function actualizarDatos(key, index, x1, y1, x2, y2, stroke, layer, color) {
     }
 }
 function eliminarDatos(key) {
-    for(var i = key; i > (key +und) ; i--){
-        if (datos[i] && datos[i].length > 0) {
-            while(datos[i].length != 0){
+    for (var i = key; i > (key + und); i--) {
+        while (datos[i] && datos[i].length > 0) {
                 datos[i].pop();
-            }
         }
-    }
+    }    
     reorder();
 }
 function reorder(){
@@ -177,12 +175,17 @@ function deleteFigure(k){
     cStack[und] =k ;
     stack[und]=JSON.parse(JSON.stringify(datos[k]));
     und++;
-    datos[k].pop();
+    while (datos[k] && datos[k].length > 0) {
+        datos[k].pop();
+    }
 }
 function undo(){
     if(und>0){
         und--; 
+        var tstack ={};
+        tstack =JSON.parse(JSON.stringify(datos[cStack[und]]));
         datos[cStack[und]]= JSON.parse(JSON.stringify(stack[und]));
+        stack[und] =JSON.parse(JSON.stringify(tstack));
 
         // console.log('a',datos[cStack[und]],'b',stack[und],cStack[und]);
         // console.log(datos);
@@ -194,8 +197,20 @@ function undo(){
     drawFigures();
 }
 function redo(){
-    if(und<=0){
-        und+=1;
+    if(und>=0){
+        var tstack ={};
+        if(cStack[und]){
+            tstack =JSON.parse(JSON.stringify(datos[cStack[und]]));
+            datos[cStack[und]]= JSON.parse(JSON.stringify(stack[und]));
+            stack[und] =JSON.parse(JSON.stringify(tstack));
+            und++; 
+        }
+        
+        // console.log('a',datos[cStack[und]],'b',stack[und],cStack[und]);
+        // console.log(datos);
+
+    }else{
+        und++;
     }
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     drawFigures();
@@ -254,6 +269,7 @@ document.getElementById('archivoInput').addEventListener('change', function(even
     }
 });
 document.getElementById("pdf").addEventListener("click", function () {savePDF();});
+document.getElementById("png").addEventListener("click", function () {savePNG();});
 document.addEventListener('keydown', function(event) {
     if (event.ctrlKey && event.key === 'z') {
         undo(); // Deshacer al presionar Ctrl + Z
@@ -270,6 +286,19 @@ canvas.addEventListener("touchstart", (event) => {event.preventDefault();event.s
 canvas.addEventListener("touchmove", (event) => {event.preventDefault();event.stopPropagation();draw(event.touches[0]);});
 canvas.addEventListener("touchend", (event) => {event.preventDefault();event.stopPropagation();stopDrawing(event.changedTouches[0]);});
 //---------------------------------funciones de los eventos-------------------//
+function savePDF(){
+    const imgData = canvas.toDataURL('image/png');
+    const pdf = new jsPDF();
+    pdf.addImage(imgData, 'PNG', 0, 0);
+    pdf.save("download.pdf");
+}
+function savePNG(){
+    const imgData = canvas.toDataURL('image/png');
+    const link = document.createElement('a');
+    link.href = imgData;
+    link.download = 'image.png';
+    link.click();
+}
 function cargarDatosDesdeJSON(archivo) {
     const lector = new FileReader();
     lector.onload = function(event) {
@@ -424,22 +453,22 @@ function draw(event) {
                     drawCircle(startX, startY,endX,endY,stroke,color);
                     break;
                 case 4:
-                    rectangle(startX,startY,endX,endY,stroke,color);
+                    rectangle(startX,startY,endX,endY,0,stroke,color);
                     break;
                 case 5:
-                    square(startX,startY,endX,stroke,color);
+                    square(startX,startY,endX,endY,stroke,color,0);
                     break;
                 case 6:
-                    drawpolygon(startX, startY, endX, endY, stroke,color,numSides);
+                    layer=drawpolygon(startX, startY, endX, endY, stroke,color,numSides);
                     break;
                 case 7:
                     drawEllipse(startX, startY, Math.abs(endX - startX), Math.abs(endY - startY), stroke,color);
                     break;
                 case 8:
-                    drawRombo(startX, startY, Math.abs(endX - startX), Math.abs(endY - startY), stroke,color);
+                    drawRombo(startX, startY, Math.abs(endX - startX), Math.abs(endY - startY),0, stroke,color);
                     break;
                 case 9:
-                    drawTrapezoid(startX,startY,endX,endY,stroke,color);
+                    drawTrapezoid(startX,startY,endX,endY,0,stroke,color);
                     break;
                 case 11:
                     if(sKey!=0){//----------------move---------------//
@@ -458,22 +487,22 @@ function draw(event) {
                                 drawCircle(datos[sKey][0].x1 + currentx, datos[sKey][0].y1 + currenty, datos[sKey][0].x2 + currentx, datos[sKey][0].y2 + currenty, datos[sKey][0].stroke,datos[sKey][0].color);
                                 break;
                             case 4:
-                                rectangle(datos[sKey][0].x1 + currentx, datos[sKey][0].y1 + currenty, datos[sKey][0].x2 + currentx, datos[sKey][0].y2 + currenty, datos[sKey][0].stroke,datos[sKey][0].color);
+                                rectangle(datos[sKey][0].x1 + currentx, datos[sKey][0].y1 + currenty, datos[sKey][0].x2 + currentx, datos[sKey][0].y2 + currenty,datos[sKey][0].layer, datos[sKey][0].stroke,datos[sKey][0].color);
                                 break;
                             case 5:
-                                square(datos[sKey][0].x1 + currentx, datos[sKey][0].y1 + currenty, datos[sKey][0].x2 + currentx,  datos[sKey][0].stroke,datos[sKey][0].color);
+                                square(datos[sKey][0].x1 + currentx, datos[sKey][0].y1 + currenty, datos[sKey][0].x2 + currentx,datos[sKey][0].y2 + currenty,  datos[sKey][0].stroke,datos[sKey][0].color,datos[sKey][0].layer);
                                 break;
                             case 6:
-                                drawpolygon(datos[sKey][0].x1 + currentx, datos[sKey][0].y1 + currenty, datos[sKey][0].x2 + currentx, datos[sKey][0].y2 + currenty, datos[sKey][0].stroke,datos[sKey][0].color,sides[sKey]);
+                                drawpolygon2(datos[sKey][0].x1 + currentx, datos[sKey][0].y1 + currenty, datos[sKey][0].x2 + currentx, datos[sKey][0].y2 + currenty, datos[sKey][0].stroke,datos[sKey][0].color,sides[sKey],datos[sKey][0].layer);
                                 break;
                             case 7:
                                 drawEllipse(datos[sKey][0].x1 + currentx, datos[sKey][0].y1 + currenty, datos[sKey][0].x2, datos[sKey][0].y2, datos[sKey][0].stroke,datos[sKey][0].color);
                                 break;
                             case 8:
-                                drawRombo(datos[sKey][0].x1 + currentx, datos[sKey][0].y1 + currenty, datos[sKey][0].x2, datos[sKey][0].y2, datos[sKey][0].stroke,datos[sKey][0].color);
+                                drawRombo(datos[sKey][0].x1 + currentx, datos[sKey][0].y1 + currenty, datos[sKey][0].x2, datos[sKey][0].y2, datos[sKey][0].layer,datos[sKey][0].stroke,datos[sKey][0].color);
                                 break;
                             case 9:
-                                drawTrapezoid(datos[sKey][0].x1 + currentx, datos[sKey][0].y1 + currenty, datos[sKey][0].x2 + currentx, datos[sKey][0].y2 + currenty, datos[sKey][0].stroke,datos[sKey][0].color);
+                                drawTrapezoid(datos[sKey][0].x1 + currentx, datos[sKey][0].y1 + currenty, datos[sKey][0].x2 + currentx, datos[sKey][0].y2 + currenty,datos[sKey][0].layer ,datos[sKey][0].stroke,datos[sKey][0].color);
                                 break;
                             default:
                             console.log("Opción no reconocida");
@@ -494,32 +523,32 @@ function draw(event) {
                         switch (datos[sKey][0].type) {
                             case 1:
                                 for (let i = 0; i < datos[sKey].length; i++) {
-                                    drawLineBresenham(datos[sKey][i].x1 , datos[sKey][i].y1 , datos[sKey][i].x2 + current, datos[sKey][i].y2 + current, datos[sKey][i].stroke,datos[sKey][i].color);
+                                    drawLineBresenham(datos[sKey][i].x1 + currentx, datos[sKey][i].y1 + currenty, datos[sKey][i].x2 + currentx, datos[sKey][i].y2 + currenty, datos[sKey][i].stroke,datos[sKey][i].color);
                                 }
                                 break;
                             case 2:                            
-                                drawLineBresenham(datos[sKey][0].x1 , datos[sKey][0].y1 , endX,endY, datos[sKey][0].stroke,datos[sKey][0].color);
+                                drawLineBresenham(datos[sKey][0].x1 , datos[sKey][0].y1 , datos[sKey][0].x2 + deltaX, datos[sKey][0].y2 + deltaY, datos[sKey][0].stroke,datos[sKey][0].color);
                                 break;
                             case 3:
                                 drawCircle(datos[sKey][0].x1 , datos[sKey][0].y1 , datos[sKey][0].x2 + deltaX, datos[sKey][0].y2 + deltaY, datos[sKey][0].stroke,datos[sKey][0].color);
                                 break;
                             case 4:
-                                rectangle(datos[sKey][0].x1 , datos[sKey][0].y1 , datos[sKey][0].x2 + deltaX, datos[sKey][0].y2 + deltaY, datos[sKey][0].stroke,datos[sKey][0].color);
+                                rectangle(datos[sKey][0].x1 , datos[sKey][0].y1 , datos[sKey][0].x2 + deltaX, datos[sKey][0].y2 + deltaY,datos[sKey][0].layer, datos[sKey][0].stroke,datos[sKey][0].color);
                                 break;
                             case 5:
-                                square(datos[sKey][0].x1 , datos[sKey][0].y1 , datos[sKey][0].x2 + currentx,  datos[sKey][0].stroke,datos[sKey][0].color);
+                                square(datos[sKey][0].x1 , datos[sKey][0].y1 , datos[sKey][0].x2 + currentx,datos[sKey][0].y2 +currenty,  datos[sKey][0].stroke,datos[sKey][0].color,datos[sKey][0].layer);
                                 break;
                             case 6:
-                                drawpolygon(datos[sKey][0].x1 , datos[sKey][0].y1 , datos[sKey][0].x2 + deltaX, datos[sKey][0].y2 + deltaY, datos[sKey][0].stroke,datos[sKey][0].color,sides[sKey]);
+                                drawpolygon2(datos[sKey][0].x1 , datos[sKey][0].y1 , datos[sKey][0].x2 + deltaX, datos[sKey][0].y2 + deltaY, datos[sKey][0].stroke,datos[sKey][0].color,sides[sKey],datos[sKey][0].layer);
                                 break;
                             case 7:
                                 drawEllipse(datos[sKey][0].x1 , datos[sKey][0].y1 , datos[sKey][0].x2 + current2, datos[sKey][0].y2 + current2 , datos[sKey][0].stroke,datos[sKey][0].color);
                                 break;
                             case 8:
-                                drawRombo(datos[sKey][0].x1 , datos[sKey][0].y1 , datos[sKey][0].x2 + current2, datos[sKey][0].y2 + current2 , datos[sKey][0].stroke,datos[sKey][0].color);
+                                drawRombo(datos[sKey][0].x1 , datos[sKey][0].y1 , datos[sKey][0].x2 + current2, datos[sKey][0].y2 + current2 ,datos[sKey][0].layer, datos[sKey][0].stroke,datos[sKey][0].color);
                                 break;
                             case 9:
-                                drawTrapezoid(datos[sKey][0].x1 , datos[sKey][0].y1 , datos[sKey][0].x2 + deltaX, datos[sKey][0].y2 + deltaY, datos[sKey][0].stroke,datos[sKey][0].color);
+                                drawTrapezoid(datos[sKey][0].x1 , datos[sKey][0].y1 , datos[sKey][0].x2 + deltaX, datos[sKey][0].y2 + deltaY, datos[sKey][0].layer,datos[sKey][0].stroke,datos[sKey][0].color);
                                 break;
                             default:
                             console.log("Opción no reconocida");
@@ -530,57 +559,52 @@ function draw(event) {
                 case 13:
                 break;
                 case 18:
-                   if(sKey!=0){//----------------move---------------//
-                        const centerX = (datos[sKey][0].x1 + datos[sKey][0].x2) / 2;
-                        const centerY = (datos[sKey][0].y1 + datos[sKey][0].y2) / 2;
-                        
-                        // Coordenadas relativas de las esquinas respecto al centro
-                        const relativeStartX = datos[sKey][0].x1 - centerX;
-                        const relativeStartY = datos[sKey][0].y1 - centerY;
-                        const relativeEndX = datos[sKey][0].x2 - centerX;
-                        const relativeEndY = datos[sKey][0].y2 - centerY;
-                        
-                        const angle = Math.atan2(relativeEndY, relativeEndX) - Math.atan2(relativeStartY, relativeStartX);
-                        // Rotación
-                        const rotatedStartX = relativeStartX * Math.cos(angle) - relativeStartY * Math.sin(angle);
-                        const rotatedStartY = relativeStartX * Math.sin(angle) + relativeStartY * Math.cos(angle);
-                        const rotatedEndX = relativeEndX * Math.cos(angle) - relativeEndY * Math.sin(angle);
-                        const rotatedEndY = relativeEndX * Math.sin(angle) + relativeEndY * Math.cos(angle);
-                        
-                        // Coordenadas absolutas de las esquinas después de la rotación
-                        const finalStartX = Math.round(rotatedStartX + centerX);
-                        const finalStartY = Math.round(rotatedStartY + centerX);
-                        const finalEndX = Math.round(rotatedEndX + centerX);
-                        const finalEndY = Math.round(rotatedEndY + centerX);
+                    if(sKey!=0){//----------------move---------------//
+                        const currentx= endX - startX; 
+                        const currenty= endY - startY;
+                        // Calcular el centro de cada rectángulo
+                        var rect1CenterX = (startX + endX) / 2;
+                        var rect1CenterY = (startY + endY) / 2;
+                        var rect2CenterX = (datos[sKey][0].x1 + datos[sKey][0].x2) / 2;
+                        var rect2CenterY = (datos[sKey][0].y1 + datos[sKey][0].y2) / 2;
+
+                        var rect1Orientation = Math.atan2(endY - startY, endX - startX);
+                        var rect2Orientation = Math.atan2(datos[sKey][0].y2 - datos[sKey][0].y1, datos[sKey][0].x2 - datos[sKey][0].x1);
+
+                        var adjustedRect2Orientation = rect2Orientation - rect1Orientation;
+
+                        var angleBetweenCenters = Math.atan2(rect2CenterY - rect1CenterY, rect2CenterX - rect1CenterX);
+
+                        var angle = angleBetweenCenters - adjustedRect2Orientation;
                         switch (datos[sKey][0].type) {
                             case 1:
                                 for (let i = 0; i < datos[sKey].length; i++) {
-                                    drawLineBresenham(datos[sKey][i].x1 , datos[sKey][i].y1 , datos[sKey][i].x2 + current, datos[sKey][i].y2 + current, datos[sKey][i].stroke,datos[sKey][i].color);
+                                    drawLineBresenham(datos[sKey][i].x1 + currentx, datos[sKey][i].y1 + currenty, datos[sKey][i].x2 + currentx, datos[sKey][i].y2 + currenty, datos[sKey][i].stroke,datos[sKey][i].color);
                                 }
                                 break;
-                            case 2:                            
-                                drawLineBresenham(finalStartX , finalStartY , finalEndX,finalEndY, datos[sKey][0].stroke,datos[sKey][0].color);
+                            case 2:  
+                                drawLineBresenham(datos[sKey][0].x1 , datos[sKey][0].y1 , datos[sKey][0].x2 , datos[sKey][0].y2, datos[sKey][0].stroke,datos[sKey][0].color);
                                 break;
                             case 3:
-                                drawCircle(finalStartX, finalStartY , finalEndX, finalEndY, datos[sKey][0].stroke,datos[sKey][0].color);
+                                drawCircle(datos[sKey][0].x1 + currentx, datos[sKey][0].y1 + currenty, datos[sKey][0].x2 + currentx, datos[sKey][0].y2 + currenty, datos[sKey][0].stroke,datos[sKey][0].color);
                                 break;
                             case 4:
-                                rectangle(finalStartX , finalStartY , finalEndX, finalEndY, datos[sKey][0].stroke,datos[sKey][0].color);
+                                rectangle(datos[sKey][0].x1, datos[sKey][0].y1 , datos[sKey][0].x2 , datos[sKey][0].y2 ,angle, datos[sKey][0].stroke,datos[sKey][0].color);
                                 break;
                             case 5:
-                                square(finalStartX , finalStartY , finalEndX,  datos[sKey][0].stroke,datos[sKey][0].color);
+                                square(datos[sKey][0].x1, datos[sKey][0].y1 , datos[sKey][0].x2 ,datos[sKey][0].y2,  datos[sKey][0].stroke,datos[sKey][0].color,angle);
                                 break;
                             case 6:
-                                drawpolygon(finalStartX, finalStartY , finalEndX, finalEndY, datos[sKey][0].stroke,datos[sKey][0].color,sides[sKey]);
+                                drawpolygon2(datos[sKey][0].x1 , datos[sKey][0].y1 , datos[sKey][0].x2 , datos[sKey][0].y2 , datos[sKey][0].stroke,datos[sKey][0].color,sides[sKey],angle);
                                 break;
                             case 7:
-                                drawEllipse(finalStartX , finalStartY , finalEndX, finalEndY, datos[sKey][0].stroke,datos[sKey][0].color);
+                                drawEllipse(datos[sKey][0].x1 , datos[sKey][0].y1 , datos[sKey][0].x2, datos[sKey][0].y2, datos[sKey][0].stroke,datos[sKey][0].color,angle);
                                 break;
                             case 8:
-                                drawRombo(finalStartX, finalStartY , finalEndX, finalEndY, datos[sKey][0].stroke,datos[sKey][0].color);
+                                drawRombo(datos[sKey][0].x1 , datos[sKey][0].y1 , datos[sKey][0].x2, datos[sKey][0].y2,angle, datos[sKey][0].stroke,datos[sKey][0].color);
                                 break;
                             case 9:
-                                drawTrapezoid(finalStartX, finalStartY , finalEndX, finalEndY, datos[sKey][0].stroke,datos[sKey][0].color);
+                                drawTrapezoid(datos[sKey][0].x1 , datos[sKey][0].y1, datos[sKey][0].x2 , datos[sKey][0].y2 ,angle, datos[sKey][0].stroke,datos[sKey][0].color);
                                 break;
                             default:
                             console.log("Opción no reconocida");
@@ -606,13 +630,11 @@ function stopDrawing(event) {
             case 2:
             case 3:
             case 4:
+            case 5:
             case 6:
             case 9:
                 agregarDatos(last,startX, startY, endX, endY);
-                drawFigures();
-                break;
-            case 5:
-                agregarDatos(last,startX, startY, endX, 0);
+                layer=0;
                 drawFigures();
                 break;
             case 7:
@@ -646,18 +668,16 @@ function stopDrawing(event) {
                         case 2:
                         case 3:
                         case 4:
+                        case 5:
                         case 6:
                         case 9:
-                            actualizarDatos(sKey,0,datos[sKey][0].x1 + currentx, datos[sKey][0].y1 + currenty, datos[sKey][0].x2 + currentx, datos[sKey][0].y2 + currenty, datos[sKey][0].stroke,0,datos[sKey][0].color);
-                            drawFigures();
-                            break;
-                        case 5:
-                            actualizarDatos(sKey,0,datos[sKey][0].x1 + currentx, datos[sKey][0].y1 + currenty, datos[sKey][0].x2 + currentx, 0, datos[sKey][0].stroke,0,datos[sKey][0].color);
+                        
+                            actualizarDatos(sKey,0,datos[sKey][0].x1 + currentx, datos[sKey][0].y1 + currenty, datos[sKey][0].x2 + currentx, datos[sKey][0].y2 + currenty, datos[sKey][0].stroke,datos[sKey][0].layer,datos[sKey][0].color);
                             drawFigures();
                             break;
                         case 7:
                         case 8:
-                            actualizarDatos(sKey,0,datos[sKey][0].x1 + currentx, datos[sKey][0].y1 + currenty, datos[sKey][0].x2 , datos[sKey][0].y2 , datos[sKey][0].stroke,0,datos[sKey][0].color);
+                            actualizarDatos(sKey,0,datos[sKey][0].x1 + currentx, datos[sKey][0].y1 + currenty, datos[sKey][0].x2 , datos[sKey][0].y2 , datos[sKey][0].stroke,datos[sKey][0].layer,datos[sKey][0].color);
                             drawFigures();
                             break;
                         default:
@@ -686,7 +706,6 @@ function stopDrawing(event) {
                             switch (datos[sKey][0].type) {
                                 case 1:
                                     for (let i = 0; i < datos[sKey].length; i++) {
-                                        drawLineBresenham(datos[sKey][i].x1 + currentx, datos[sKey][i].y1 + currenty, datos[sKey][i].x2 + currentx, datos[sKey][i].y2 + currenty, datos[sKey][i].stroke,datos[sKey][i].color);
                                         actualizarDatos(sKey,i,datos[sKey][i].x1 + currentx, datos[sKey][i].y1 + currenty, datos[sKey][i].x2 + currentx, datos[sKey][i].y2 + currenty, datos[sKey][i].stroke,0,datos[sKey][i].color);
                                     }
                                     break;
@@ -695,16 +714,15 @@ function stopDrawing(event) {
                                 case 4:
                                 case 6:
                                 case 9:
-                                    actualizarDatos(sKey,0,datos[sKey][0].x1 , datos[sKey][0].y1 , datos[sKey][0].x2 + deltaX, datos[sKey][0].y2 + deltaY, datos[sKey][0].stroke,0,datos[sKey][0].color);
+                                    actualizarDatos(sKey,0,datos[sKey][0].x1 , datos[sKey][0].y1 , datos[sKey][0].x2 + deltaX, datos[sKey][0].y2 + deltaY, datos[sKey][0].stroke,datos[sKey][0].layer,datos[sKey][0].color);
                                     drawFigures();
                                     break;
                                 case 5:
-                                    actualizarDatos(sKey,0,datos[sKey][0].x1 , datos[sKey][0].y1 , datos[sKey][0].x2 + currentx,0,  datos[sKey][0].stroke,0,datos[sKey][0].color);
-                                    drawFigures();
+                                    actualizarDatos(sKey,0,datos[sKey][0].x1 , datos[sKey][0].y1 ,datos[sKey][0].x2 + currentx,datos[sKey][0].y2 + currenty, datos[sKey][0].stroke,datos[sKey][0].layer,datos[sKey][0].color);
                                     break;
                                 case 7:
                                 case 8:
-                                    actualizarDatos(sKey,0,datos[sKey][0].x1 , datos[sKey][0].y1 , datos[sKey][0].x2 + current2, datos[sKey][0].y2 + current2 , datos[sKey][0].stroke,0,datos[sKey][0].color);
+                                    actualizarDatos(sKey,0,datos[sKey][0].x1 , datos[sKey][0].y1 , datos[sKey][0].x2 + current2, datos[sKey][0].y2 + current2 , datos[sKey][0].stroke,datos[sKey][0].layer,datos[sKey][0].color);
                                     drawFigures();
                                     break;
                                 default:
@@ -722,6 +740,37 @@ function stopDrawing(event) {
             case 16:
             case 17:
             drawFigures();
+            break;
+            case 18:
+                if(sKey!=0){//----------------move---------------//
+                    // console.log(sKey);
+                    cStack[und] =sKey ;
+                    stack[und]=JSON.parse(JSON.stringify(datos[sKey]));
+                    // console.log('c',cStack[und], 's',stack[und],'k',sKey);
+                    und++; 
+                    const currentx= endX - startX; 
+                    const currenty= endY - startY;
+                    // Calcular el centro de cada rectángulo
+                    var rect1CenterX = (startX + endX) / 2;
+                    var rect1CenterY = (startY + endY) / 2;
+                    var rect2CenterX = (datos[sKey][0].x1 + datos[sKey][0].x2) / 2;
+                    var rect2CenterY = (datos[sKey][0].y1 + datos[sKey][0].y2) / 2;
+                    var rect1Orientation = Math.atan2(endY - startY, endX - startX);
+                    var rect2Orientation = Math.atan2(datos[sKey][0].y2 - datos[sKey][0].y1, datos[sKey][0].x2 - datos[sKey][0].x1);
+                    var adjustedRect2Orientation = rect2Orientation - rect1Orientation;
+                    var angleBetweenCenters = Math.atan2(rect2CenterY - rect1CenterY, rect2CenterX - rect1CenterX);
+                    var angle = angleBetweenCenters - adjustedRect2Orientation;
+                    if(datos[sKey][0].type==1){
+                        for (let i = 0; i < datos[sKey].length; i++) {
+                            actualizarDatos(sKey,i,datos[sKey][i].x1 + currentx, datos[sKey][i].y1 + currenty, datos[sKey][i].x2 + currentx, datos[sKey][i].y2 + currenty, datos[sKey][i].stroke,0,datos[sKey][i].color);
+                        }
+                    }
+                    actualizarDatos(sKey,0,datos[sKey][0].x1 , datos[sKey][0].y1 , datos[sKey][0].x2 , datos[sKey][0].y2, datos[sKey][0].stroke,angle,datos[sKey][0].color);
+                    drawFigures();
+                        
+                }
+                sKey =0;
+                drawFigures();
             break;
             default:
                 console.log("Opción no reconocida");
@@ -760,37 +809,37 @@ function selectFigure(x,y){
                         }
                         break;
                     case 4: 
-                        if(selectRectangle(datos[key][i].x1,datos[key][i].y1,datos[key][i].x2,datos[key][i].y2,x,y,datos[key][i].stroke)){
+                        if(selectRectangle(datos[key][i].x1,datos[key][i].y1,datos[key][i].x2,datos[key][i].y2,x,y,datos[key][i].stroke,datos[key][i].layer)){
                             // console.log('key',key);
                             return key;
                         }                        
                         break;
                     case 5:
-                        if(selectSquare(datos[key][i].x1,datos[key][i].y1,datos[key][i].x2,x,y,datos[key][i].stroke)){
+                        if(selectSquare(datos[key][i].x1,datos[key][i].y1,datos[key][i].x2,datos[key][i].y2,x,y,datos[key][i].stroke,datos[key][i].layer)){
                             // console.log('key',key);
                             return key;
                         }                           
                         break;
                     case 6:
-                        if(selectPolygon(datos[key][i].x1,datos[key][i].y1,datos[key][i].x2,datos[key][i].y2,x,y,datos[key][i].stroke, sides[key])){
+                        if(selectPolygon(datos[key][i].x1,datos[key][i].y1,datos[key][i].x2,datos[key][i].y2,x,y,datos[key][i].stroke, sides[key],datos[key][i].layer)){
                             // console.log('key',key);
                             return key;
                         }                             
                         break;
                     case 7:
-                        if(selectEllipse(datos[key][i].x1,datos[key][i].y1,datos[key][i].x2,datos[key][i].y2,x,y,datos[key][i].stroke)){
+                        if(selectEllipse(datos[key][i].x1,datos[key][i].y1,datos[key][i].x2,datos[key][i].y2,x,y,datos[key][i].stroke,datos[key][i].layer)){
                             // console.log('key',key);
                             return key;
                         }                             
                         break;
                     case 8:
-                        if(selectRombo(datos[key][i].x1,datos[key][i].y1,datos[key][i].x2,datos[key][i].y2,x,y,datos[key][i].stroke)){
+                        if(selectRombo(datos[key][i].x1,datos[key][i].y1,datos[key][i].x2,datos[key][i].y2,datos[key][i].layer,x,y,datos[key][i].stroke)){
                             // console.log('key',key);
                             return key;
                         }                             
                         break;
                     case 9:
-                        if(selectTrapezoid(datos[key][i].x1,datos[key][i].y1,datos[key][i].x2,datos[key][i].y2,x,y,datos[key][i].stroke)){
+                        if(selectTrapezoid(datos[key][i].x1,datos[key][i].y1,datos[key][i].x2,datos[key][i].y2,datos[key][0].layer,x,y,datos[key][i].stroke)){
                             // console.log('key',key);
                             return key;
                         }       
@@ -821,22 +870,22 @@ function drawFigures() {
                         drawCircle(datos[key][i].x1,datos[key][i].y1,datos[key][i].x2,datos[key][i].y2,datos[key][i].stroke,datos[key][i].color);
                         break;
                     case 4:
-                        rectangle(datos[key][i].x1,datos[key][i].y2,datos[key][i].x2,datos[key][i].y1,datos[key][i].stroke,datos[key][i].color);
+                        rectangle(datos[key][i].x1,datos[key][i].y2,datos[key][i].x2,datos[key][i].y1,datos[key][i].layer,datos[key][i].stroke,datos[key][i].color);
                         break;
                     case 5:
-                        square(datos[key][i].x1,datos[key][i].y1,datos[key][i].x2,datos[key][i].stroke,datos[key][i].color);
+                        square(datos[key][i].x1,datos[key][i].y1,datos[key][i].x2,datos[key][i].y2,datos[key][i].stroke,datos[key][i].color,datos[key][i].layer);
                         break;
                     case 6:
-                        drawpolygon(datos[key][i].x1,datos[key][i].y1,datos[key][i].x2,datos[key][i].y2,datos[key][i].stroke,datos[key][i].color, sides[key]);
+                        drawpolygon2(datos[key][i].x1,datos[key][i].y1,datos[key][i].x2,datos[key][i].y2,datos[key][i].stroke,datos[key][i].color, sides[key],datos[key][i].layer);
                         break;
                     case 7:
                         drawEllipse(datos[key][i].x1,datos[key][i].y1,datos[key][i].x2,datos[key][i].y2,datos[key][i].stroke,datos[key][i].color);
                         break;
                     case 8:
-                        drawRombo(datos[key][i].x1,datos[key][i].y1,datos[key][i].x2,datos[key][i].y2,datos[key][i].stroke,datos[key][i].color);
+                        drawRombo(datos[key][i].x1,datos[key][i].y1,datos[key][i].x2,datos[key][i].y2,datos[key][i].layer,datos[key][i].stroke,datos[key][i].color,datos[key][i].layer);
                         break;
                     case 9:
-                        drawTrapezoid(datos[key][i].x1,datos[key][i].y1,datos[key][i].x2,datos[key][i].y2,datos[key][i].stroke,datos[key][i].color);
+                        drawTrapezoid(datos[key][i].x1,datos[key][i].y1,datos[key][i].x2,datos[key][i].y2,datos[key][i].layer,datos[key][i].stroke,datos[key][i].color);
                     default:
                         break;
                 }
