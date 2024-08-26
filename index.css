@@ -177,7 +177,7 @@ h1 {
 }
 .tooltip-text {
   visibility: hidden;
-  width: 120px;
+  width: 60%;
   background-color: #000;
   color: #fff;
   text-align: center;
