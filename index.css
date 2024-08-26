@@ -171,6 +171,30 @@ h1 {
   margin: 0%;
   padding: 0;
 }
+.tooltip-container{
+  position:relative;
+
+}
+.tooltip-text {
+  visibility: hidden;
+  width: 120px;
+  background-color: #000;
+  color: #fff;
+  text-align: center;
+  border-radius: 6px;
+  padding: 5px;
+  position: absolute;
+  z-index: 1;
+  bottom: 125%; /* Posiciona el tooltip encima del elemento */
+  left: 50%;
+  transform: translateX(-50%);
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+.tooltip-container:hover .tooltip-text {
+  visibility: visible;
+  opacity: 1;
+}
 .flexy{
   border-radius: 88% 12% 89% 11% / 5% 92% 8% 95%;
   background-color: rgba(139, 46, 209, .5) ;
